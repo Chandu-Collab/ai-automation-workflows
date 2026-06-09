@@ -1,8 +1,12 @@
-# 🚀 AI Lead Capture & Auto Response System (n8n)
+# 🚀 AI Automation Workflows (n8n)
 
-This workflow automatically captures leads, generates AI responses, and sends instant replies.
+This repository contains AI-powered automation workflows built using n8n to solve real-world problems.
 
-## 🔥 Features
+---
+
+## 🔥 Workflows Included
+
+### 1. 📩 AI Lead Capture & Auto Response System
 
 * 📥 Capture leads via webhook
 * 🤖 Generate AI-powered responses
@@ -12,19 +16,29 @@ This workflow automatically captures leads, generates AI responses, and sends in
 
 ---
 
-## 🧠 Use Case
+### 2. 🧠 AI Resume-Based Job Matching Agent
 
-Businesses often lose leads due to slow responses.
+* 📄 Analyze resume using AI
+* 🧠 Extract skills and roles
+* 🔍 Fetch jobs from APIs (Remotive)
+* 🎯 Match jobs based on skills
+* ✉️ Send curated job results via email with explanations
 
-This workflow solves that by replying instantly using AI.
+---
+
+## 🧠 Use Cases
+
+* Automate lead response systems for businesses
+* Help job seekers find relevant opportunities faster
+* Build real-world AI-powered automation workflows
 
 ---
 
 ## ⚙️ Setup Instructions
 
-1. Import the JSON file into n8n
+1. Import the required workflow JSON into n8n
 2. Add your OpenAI API key
-3. Connect Google Sheets
+3. Connect Google Sheets (for lead system)
 4. Configure Gmail credentials
 5. Activate the workflow
 
@@ -32,22 +46,23 @@ This workflow solves that by replying instantly using AI.
 
 ## 📂 Files
 
-* `Lead Capture-Auto Response System.json` → Main workflow
+* `lead-capture-agent.json` → Lead Capture Workflow
+* `job-matching-agent.json` → Job Matching Workflow
 
 ---
 
 ## 🚀 Demo
 
-Built as part of a real-world AI automation series.
+Built as part of a real-world AI automation series 🚀
 
 ---
 
 ## 📌 Author
 
-Built by [Chandu]
+Built by **Chandu**
 
 ---
 
 ## ⭐ Support
 
-If you found this useful, consider starring this repo!
+If you found this useful, consider starring this repo ⭐
