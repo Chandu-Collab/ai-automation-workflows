@@ -1,68 +1,99 @@
-# 🚀 AI Automation Workflows (n8n)
+<p align="center">
+  <img src="workflows/banner/banner.png" alt="AI Automation Workflows Banner" width="100%">
+</p>
 
-This repository contains AI-powered automation workflows built using n8n to solve real-world problems.
 
----
+# 🚀 AI Automation Workflows (n8n + AI Agents)
 
-## 🔥 Workflows Included
+![n8n](https://img.shields.io/badge/Built%20With-n8n-orange)
+![AI](https://img.shields.io/badge/Powered%20By-AI-blue)
+![Automation](https://img.shields.io/badge/Type-Automation-green)
+![Status](https://img.shields.io/badge/Status-Active-success)
 
-### 1. 📩 AI Lead Capture & Auto Response System
-
-* 📥 Capture leads via webhook
-* 🤖 Generate AI-powered responses
-* 💾 Store leads & responses in Google Sheets
-* 📧 Send automated email replies
-* 📊 Track response status (pending/sent/failed)
+This repository contains real-world AI automation workflows built using **n8n**, focused on solving practical problems using AI and APIs.
 
 ---
 
-### 2. 🧠 AI Resume-Based Job Matching Agent
+## 🔥 Workflows
 
-* 📄 Analyze resume using AI
-* 🧠 Extract skills and roles
-* 🔍 Fetch jobs from APIs (Remotive)
-* 🎯 Match jobs based on skills
-* ✉️ Send curated job results via email with explanations
+### 🧠 AI Resume-Based Job Matching Agent
 
----
+Finds relevant jobs based on a user's resume and sends them via email.
 
-## 🧠 Use Cases
-
-* Automate lead response systems for businesses
-* Help job seekers find relevant opportunities faster
-* Build real-world AI-powered automation workflows
+📁 Folder: `job-matching-agent/`
 
 ---
 
-## ⚙️ Setup Instructions
+### 📩 AI Lead Capture & Auto Response System
 
-1. Import the required workflow JSON into n8n
-2. Add your OpenAI API key
-3. Connect Google Sheets (for lead system)
-4. Configure Gmail credentials
-5. Activate the workflow
+Captures leads, generates AI responses, and sends instant replies.
+
+📁 Folder: `lead-capture-agent/`
 
 ---
 
-## 📂 Files
+## ⚙️ Tech Stack
 
-* `lead-capture-agent.json` → Lead Capture Workflow
-* `job-matching-agent.json` → Job Matching Workflow
-
----
-
-## 🚀 Demo
-
-Built as part of a real-world AI automation series 🚀
+* n8n (Workflow Automation)
+* OpenAI
+* Gmail
+* Google Sheets
+* Remotive API
+* Webhooks
 
 ---
 
-## 📌 Author
+## 🚀 How to Use
 
-Built by **Chandu**
+1. Open any workflow folder
+2. Import the `.json` file into n8n
+3. Add your API credentials
+4. Configure required nodes
+5. Run or activate the workflow
+
+---
+
+## 📂 Project Structure
+
+```bash
+ai-automation-workflows/
+├── lead-capture-agent/
+├── job-matching-agent/
+```
+
+---
+
+## 💡 About This Project
+
+This repository is part of my journey of building real-world AI agents and automation workflows.
+
+Focused on:
+
+* Practical use cases
+* Developer-friendly automation
+* Scalable AI systems
+* Building in public
+
+---
+
+## 🔗 Connect & Follow
+
+📸 Instagram: https://www.instagram.com/shinka_6c
+
+🎥 YouTube: https://youtube.com/@shinka-6c
+
+💬 YouTube Community: https://www.youtube.com/@shinka-6c/community
+
+🚀 Follow along as I build AI workflows, automation systems, and real-world AI agents.
 
 ---
 
 ## ⭐ Support
 
-If you found this useful, consider starring this repo ⭐
+If you find this useful, consider giving a star ⭐
+
+---
+
+## 📌 Author
+
+Built by **Chandu (Shinka-6C)** 🚀
