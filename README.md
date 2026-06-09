@@ -2,6 +2,7 @@
   <img src="workflows/banner/banner.png" alt="AI Automation Workflows Banner" width="100%">
 </p>
 
+---
 
 # 🚀 AI Automation Workflows (n8n + AI Agents)
 
@@ -9,8 +10,10 @@
 ![AI](https://img.shields.io/badge/Powered%20By-AI-blue)
 ![Automation](https://img.shields.io/badge/Type-Automation-green)
 ![Status](https://img.shields.io/badge/Status-Active-success)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
-This repository contains real-world AI automation workflows built using **n8n**, focused on solving practical problems using AI and APIs.
+🚀 Build AI agents that automate real-world tasks like job searching and lead handling — powered by n8n, OpenAI, and APIs.
+
 
 ---
 
@@ -20,7 +23,9 @@ This repository contains real-world AI automation workflows built using **n8n**,
 
 Finds relevant jobs based on a user's resume and sends them via email.
 
-📁 Folder: `job-matching-agent/`
+📁 Folder: [job-matching-agent](./workflows/job-matching-agent/)
+
+
 
 ---
 
@@ -28,7 +33,8 @@ Finds relevant jobs based on a user's resume and sends them via email.
 
 Captures leads, generates AI responses, and sends instant replies.
 
-📁 Folder: `lead-capture-agent/`
+📁 Folder: [lead-capture-agent](workflows/lead-capture-agent/)
+
 
 ---
 
@@ -57,8 +63,8 @@ Captures leads, generates AI responses, and sends instant replies.
 
 ```bash
 ai-automation-workflows/
-├── lead-capture-agent/
-├── job-matching-agent/
+├── workflows/lead-capture-agent/
+├── workflows/job-matching-agent/
 ```
 
 ---
