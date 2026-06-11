@@ -33,10 +33,10 @@ Finds relevant jobs based on a user's resume and sends them via email.
 
 Captures leads, generates AI responses, and sends instant replies.
 
-📁 Folder: [lead-capture-agent](workflows/lead-capture-agent/)
+📁 Folder: [lead-capture-agent](./workflows/lead-capture-agent/)
 
 
-###🎬 AI YouTube Content Repurposer
+**###🎬 AI YouTube Content Repurposer**
 
 Transforms a single YouTube video into multiple types of content automatically using AI.
 
@@ -48,8 +48,7 @@ Transforms a single YouTube video into multiple types of content automatically u
 📝 Blog Article
 📧 Sends everything directly to email
 
-📁 Folder: youtube-content-repurposer
-
+📁 Folder: [ai-youtube-content-repurposer](./workflows/ai-youtube-content-repurposer/)
 ---
 
 ## ⚙️ Tech Stack
@@ -79,6 +78,7 @@ Transforms a single YouTube video into multiple types of content automatically u
 ai-automation-workflows/
 ├── workflows/lead-capture-agent/
 ├── workflows/job-matching-agent/
+├── workflows/ai-youtube-content-repurposer/
 ```
 
 ---
