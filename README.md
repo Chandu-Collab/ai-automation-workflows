@@ -36,6 +36,20 @@ Captures leads, generates AI responses, and sends instant replies.
 📁 Folder: [lead-capture-agent](workflows/lead-capture-agent/)
 
 
+###🎬 AI YouTube Content Repurposer
+
+Transforms a single YouTube video into multiple types of content automatically using AI.
+
+✨ Generates:
+
+✍️ LinkedIn Post
+📸 Instagram Caption + Reel Script
+🐦 Twitter Thread
+📝 Blog Article
+📧 Sends everything directly to email
+
+📁 Folder: youtube-content-repurposer
+
 ---
 
 ## ⚙️ Tech Stack
