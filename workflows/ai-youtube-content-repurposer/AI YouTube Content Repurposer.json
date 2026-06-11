@@ -1,0 +1,1283 @@
+{
+  "updatedAt": "2026-06-10T09:38:19.755Z",
+  "createdAt": "2026-06-09T10:20:55.302Z",
+  "id": "oDf5y6iWAfbojygq",
+  "name": "AI YouTube Content Repurposer",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "f908910d-cb4c-4382-a525-bcf1696af3b7",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5c1209b4-6ee8-433d-b808-1b87157158a7",
+      "name": "Webhook-Receive Input",
+      "webhookId": "f908910d-cb4c-4382-a525-bcf1696af3b7"
+    },
+    {
+      "parameters": {
+        "jsCode": "const url = $json.body.youtube_url;\n\nif (!url) {\n  throw new Error(\"youtube_url not found\");\n}\n\n// handle multiple formats\nlet videoId = null;\n\n// standard format\nlet match = url.match(/v=([^&]+)/);\nif (match) {\n  videoId = match[1];\n}\n\n// short format (youtu.be)\nif (!videoId) {\n  match = url.match(/youtu\\.be\\/([^?]+)/);\n  if (match) videoId = match[1];\n}\n\nreturn [{\n  videoId,\n  originalUrl: url\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "40930972-39a5-4021-8992-652f75cb1daa",
+      "name": "Extract Video-ID"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/actors/topaz_sharingan~youtube-transcript-scraper-1/run-sync-get-dataset-items?token=YOUR_APIFY_API_TOKEN",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"startUrls\": [\n    {\n      \"url\": \"https://www.youtube.com/watch?v={{$json.videoId}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "75ec0ccf-fe1d-4d34-a314-08e5fa71e7b9",
+      "name": "Fetch Video Meta-Data",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "XlEizMhtZ5gksiA4",
+          "name": "Bearer Auth account"
+        },
+        "httpHeaderAuth": {
+          "id": "ESiOPGJW150OHsro",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $json.text;\n\n// basic cleanup\ntext = text.replace(/\\s+/g, ' ').trim();\n\n// optional: limit size (VERY IMPORTANT for AI)\ntext = text.slice(0, 8000);\n\nreturn [{\n  cleanTranscript: text,\n  title: $json.videoTitle\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "821c8029-3357-467a-897a-a6bdae3947ac",
+      "name": "Clean Transcript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer YOUR_NVIDIA_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta/llama-3.1-70b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a strict JSON generator. Always return valid JSON only.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Analyze the following YouTube transcript and return ONLY JSON.\\n\\nTitle: {{$json.title}}\\n\\nTranscript:\\n{{$json.cleanTranscript}}\\n\\nReturn format:\\n{\\n  \\\"topic\\\": \\\"\\\",\\n  \\\"summary\\\": \\\"\\\",\\n  \\\"key_points\\\": [],\\n  \\\"hooks\\\": []\\n}\"\n    }\n  ],\n  \"temperature\": 0.2,\n  \"top_p\": 0.7,\n  \"max_tokens\": 1024,\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        832,
+        0
+      ],
+      "id": "0b1c8c16-986e-4ee0-8172-df5fad413477",
+      "name": "Generate Structured Content(Topic & Summary)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.choices[0].message.content.trim();\n\n// extract JSON safely\nconst jsonStart = raw.indexOf(\"{\");\nconst jsonString = raw.slice(jsonStart);\n\nconst data = JSON.parse(jsonString);\n\nreturn [{\n  topic: data.topic,\n  summary: data.summary,\n  key_points: data.key_points,\n  hooks: data.hooks\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "06880a1c-fe2d-4947-bd1f-815dc2e028eb",
+      "name": "parse structured output"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer YOUR_NVIDIA_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta/llama-3.1-70b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ \n        'Write a professional LinkedIn post.\\\\n\\\\n' +\n        'Topic: ' + $json.topic + '\\\\n\\\\n' +\n        'Summary: ' + $json.summary + '\\\\n\\\\n' +\n        'Key Points:\\\\n' + ($json.key_points || []).join('\\\\n') + '\\\\n\\\\n' +\n        'Instructions:\\\\n' +\n        '- Start with strong hook\\\\n' +\n        '- Use bullet points\\\\n' +\n        '- Keep it professional\\\\n' +\n        '- Add a conclusion\\\\n' +\n        '- End with a question'\n      }}\"\n    }\n  ],\n  \"temperature\": 0.7,\n  \"top_p\": 0.7,\n  \"max_tokens\": 800\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1328,
+        -144
+      ],
+      "id": "0068d682-e66d-4bcd-b843-aba70cd1723d",
+      "name": "generate Linkedin Post"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $json.choices[0].message.content;\n\nreturn [\n  {\n    linkedin_post: content\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        -144
+      ],
+      "id": "b2292f80-b38f-47c8-9d22-2d09d14bbadb",
+      "name": "Parse Linkedin output"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer YOUR_NVIDIA_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta/llama-3.1-70b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ \n        'Create Instagram caption and reel script.\\\\n\\\\n' +\n        'Topic: ' + $json.topic + '\\\\n\\\\n' +\n        'Hooks:\\\\n' + ($json.hooks || []).join('\\\\n') + '\\\\n\\\\n' +\n        'Key Points:\\\\n' + ($json.key_points || []).join('\\\\n') + '\\\\n\\\\n' +\n        'Output format:\\\\n\\\\n' +\n        'Caption:\\\\n' +\n        '- Strong hook\\\\n' +\n        '- Short lines\\\\n' +\n        '- Emojis\\\\n' +\n        '- CTA (save/share/comment)\\\\n' +\n        '- 5 hashtags\\\\n\\\\n' +\n        'Reel Script:\\\\n' +\n        '- Hook (first 3 sec)\\\\n' +\n        '- 5 scenes\\\\n' +\n        '- Short lines\\\\n' +\n        '- Ending CTA'\n      }}\"\n    }\n  ],\n  \"temperature\": 0.8,\n  \"top_p\": 0.7,\n  \"max_tokens\": 1000\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1328,
+        64
+      ],
+      "id": "30b2104d-acff-40ff-8ce4-1bf1c60f353f",
+      "name": "generate instagram content"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $json.choices[0].message.content;\n\nreturn [\n  {\n    instagram_output: content\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        64
+      ],
+      "id": "1e5357be-7c88-49ba-bba6-1ccbe6c97556",
+      "name": "Parse instagram output"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer YOUR_NVIDIA_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta/llama-3.1-70b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ \n        'Create a viral Twitter thread.\\\\n\\\\n' +\n        'Topic: ' + $json.topic + '\\\\n\\\\n' +\n        'Key Points:\\\\n' + ($json.key_points || []).join('\\\\n') + '\\\\n\\\\n' +\n        'Instructions:\\\\n' +\n        '- 5 to 7 tweets\\\\n' +\n        '- Numbered (1/, 2/, etc.)\\\\n' +\n        '- Short and punchy\\\\n' +\n        '- Engaging tone\\\\n' +\n        '- Strong final tweet'\n      }}\"\n    }\n  ],\n  \"temperature\": 0.7,\n  \"top_p\": 0.7,\n  \"max_tokens\": 600\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1344,
+        272
+      ],
+      "id": "f70369ea-c318-40dd-86a9-3931552a0721",
+      "name": "generate twitter thread"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $json.choices[0].message.content;\n\nreturn [\n  {\n    twitter_thread: content\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        272
+      ],
+      "id": "d6fe914b-9f52-4345-9ed7-e310b7c02e8d",
+      "name": "parse twitter thread output"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer YOUR_NVIDIA_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta/llama-3.1-70b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ \n        'Write a detailed blog article.\\\\n\\\\n' +\n        'Topic: ' + $json.topic + '\\\\n\\\\n' +\n        'Summary: ' + $json.summary + '\\\\n\\\\n' +\n        'Key Points:\\\\n' + ($json.key_points || []).join('\\\\n') + '\\\\n\\\\n' +\n        'Structure:\\\\n' +\n        '- Title\\\\n' +\n        '- Introduction\\\\n' +\n        '- Sections with headings\\\\n' +\n        '- Conclusion'\n      }}\"\n    }\n  ],\n  \"temperature\": 0.7,\n  \"top_p\": 0.7,\n  \"max_tokens\": 1200\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1344,
+        480
+      ],
+      "id": "067dbd06-ef6b-47c9-8c05-9ece40037517",
+      "name": "generate blog content"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $json.choices[0].message.content;\n\nreturn [\n  {\n    blog: content\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        480
+      ],
+      "id": "f5fbad6b-8fce-4d33-a748-e2d115ff7683",
+      "name": "parse blog output"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1888,
+        80
+      ],
+      "id": "612b0ed2-6f27-4e2b-a5b8-0f8a7591b464",
+      "name": "Merge All content"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nlet result = {\n  linkedin: \"\",\n  instagram: \"\",\n  twitter: \"\",\n  blog: \"\"\n};\n\nfor (const item of items) {\n  if (item.json.linkedin_post) {\n    result.linkedin = item.json.linkedin_post;\n  }\n\n  if (item.json.instagram_output) {\n    result.instagram = item.json.instagram_output;\n  }\n\n  if (item.json.twitter_thread) {\n    result.twitter = item.json.twitter_thread;\n  }\n\n  if (item.json.blog) {\n    result.blog = item.json.blog;\n  }\n}\n\nreturn [result];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        80
+      ],
+      "id": "40aa2a6a-b95d-4135-ba60-66a2b2092f14",
+      "name": "Prepare Final Output"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }} ",
+        "subject": "AI Generated Content from YouTube 🚀",
+        "emailType": "text",
+        "message": "=LinkedIn:\n{{ $json.linkedin }}\n\n------------------------\n\nInstagram:\n{{$json.instagram}}\n\n------------------------\n\nTwitter:\n{{$json.twitter}}\n\n------------------------\n\nBlog:\n{{$json.blog}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2288,
+        -64
+      ],
+      "id": "d190da06-486d-4e92-9b63-cee740f356b1",
+      "name": "Send email to user",
+      "webhookId": "6b9cd53b-ae8c-47cf-ac7d-08413dc57a74",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dJo19xe1bVod4Y6k",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nlet email = \"\";\nlet content = {\n  linkedin: \"\",\n  instagram: \"\",\n  twitter: \"\",\n  blog: \"\"\n};\n\nfor (const item of items) {\n  if (item.json.body?.email) {\n    email = item.json.body.email;\n  }\n\n  if (item.json.linkedin) content.linkedin = item.json.linkedin;\n  if (item.json.instagram) content.instagram = item.json.instagram;\n  if (item.json.twitter) content.twitter = item.json.twitter;\n  if (item.json.blog) content.blog = item.json.blog;\n}\n\nreturn [\n  {\n    email,\n    ...content\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        -400
+      ],
+      "id": "86b63056-cb09-45a0-84b1-76ffd20c1bf8",
+      "name": "prepare email data"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1248,
+        -400
+      ],
+      "id": "4be369b5-93fd-4358-ad1c-6e897e8c2eab",
+      "name": "Combine Input + Content for Email"
+    },
+    {
+      "parameters": {
+        "content": "Webhook Input\n\nSend a POST request:\n\n{\n  \"youtube_url\": \"https://youtube.com/watch?v=VIDEO_ID\",\n  \"email\": \"your@email.com\"\n}"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -64,
+        -304
+      ],
+      "typeVersion": 1,
+      "id": "366a1cc5-eff8-454a-81fe-2d5cfb1b7890",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Apify API (YouTube Transcript) — Required\n\nThis workflow uses:\n\n👉 Actor: starvibe~youtube-video-transcript\n\nSteps:\nGo to: https://apify.com/starvibe/youtube-video-transcript\nClick Try for free\nCopy your Apify API Token\nAdd in n8n:\nOpen Transcript HTTP Request node\nSet URL:\nhttps://api.apify.com/v2/actors/starvibe~youtube-video-transcript/run-sync-get-d"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        -304
+      ],
+      "typeVersion": 1,
+      "id": "4ba15e6a-0d9b-49b7-92ab-c3df46e04766",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "LLM API (Content Generation) — Required\n\nThis workflow uses:\n\n👉 Provider: NVIDIA API\n👉 Model: meta/llama-3.1-70b-instruct\n\nSteps:\nGo to: https://build.nvidia.com/\nGenerate API Key\nAdd in n8n:\nOpen all AI HTTP Request nodes\nSet:\nPOST https://integrate.api.nvidia.com/v1/chat/completions\nHeaders:\nAuthorization: Bearer YOUR_NVIDIA_API_KEY\nContent-Type: application/json"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        768,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "b314a515-25c3-4fd2-a903-7688a2642208",
+      "name": "Sticky Note2"
+    }
+  ],
+  "connections": {
+    "Webhook-Receive Input": {
+      "main": [
+        [
+          {
+            "node": "Extract Video-ID",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Combine Input + Content for Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Video-ID": {
+      "main": [
+        [
+          {
+            "node": "Fetch Video Meta-Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Video Meta-Data": {
+      "main": [
+        [
+          {
+            "node": "Clean Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Transcript": {
+      "main": [
+        [
+          {
+            "node": "Generate Structured Content(Topic & Summary)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Structured Content(Topic & Summary)": {
+      "main": [
+        [
+          {
+            "node": "parse structured output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse structured output": {
+      "main": [
+        [
+          {
+            "node": "generate Linkedin Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "generate instagram content",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "generate twitter thread",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "generate blog content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generate Linkedin Post": {
+      "main": [
+        [
+          {
+            "node": "Parse Linkedin output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Linkedin output": {
+      "main": [
+        [
+          {
+            "node": "Merge All content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generate instagram content": {
+      "main": [
+        [
+          {
+            "node": "Parse instagram output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse instagram output": {
+      "main": [
+        [
+          {
+            "node": "Merge All content",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "generate twitter thread": {
+      "main": [
+        [
+          {
+            "node": "parse twitter thread output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse twitter thread output": {
+      "main": [
+        [
+          {
+            "node": "Merge All content",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "generate blog content": {
+      "main": [
+        [
+          {
+            "node": "parse blog output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse blog output": {
+      "main": [
+        [
+          {
+            "node": "Merge All content",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge All content": {
+      "main": [
+        [
+          {
+            "node": "Prepare Final Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Final Output": {
+      "main": [
+        [
+          {
+            "node": "Combine Input + Content for Email",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "prepare email data": {
+      "main": [
+        [
+          {
+            "node": "Send email to user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Input + Content for Email": {
+      "main": [
+        [
+          {
+            "node": "prepare email data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "0c8c45a7-bb71-479c-aa1f-7530efb2bde5",
+  "activeVersionId": "0c8c45a7-bb71-479c-aa1f-7530efb2bde5",
+  "versionCounter": 295,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-06-09T10:20:55.312Z",
+      "createdAt": "2026-06-09T10:20:55.312Z",
+      "role": "workflow:owner",
+      "workflowId": "oDf5y6iWAfbojygq",
+      "projectId": "loWf0mBs1xKuh5N3",
+      "project": {
+        "updatedAt": "2026-06-04T07:55:05.260Z",
+        "createdAt": "2026-06-04T07:52:41.897Z",
+        "id": "loWf0mBs1xKuh5N3",
+        "name": "Chandu M <chandouqiande@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2026-06-09T06:33:15.749Z",
+      "createdAt": "2026-06-09T06:33:15.749Z",
+      "id": "OqenQjr9s45g7AEO",
+      "name": "ai"
+    },
+    {
+      "updatedAt": "2026-06-10T09:16:19.345Z",
+      "createdAt": "2026-06-10T09:16:19.345Z",
+      "id": "Zpgj2SBB05JAFDlG",
+      "name": "content Creation"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:22.379Z",
+      "createdAt": "2026-06-09T06:33:22.379Z",
+      "id": "aM91rNGq256NAUAN",
+      "name": "automation"
+    },
+    {
+      "updatedAt": "2026-06-10T09:16:12.306Z",
+      "createdAt": "2026-06-10T09:16:12.306Z",
+      "id": "dPevEKb2LsXMo6HG",
+      "name": "youtube"
+    },
+    {
+      "updatedAt": "2026-06-10T09:16:26.702Z",
+      "createdAt": "2026-06-10T09:16:26.702Z",
+      "id": "ngqZIrfaZgCN97PJ",
+      "name": "Social Media"
+    }
+  ],
+  "parentFolder": null,
+  "activeVersion": {
+    "updatedAt": "2026-06-10T09:17:03.000Z",
+    "createdAt": "2026-06-10T09:13:44.207Z",
+    "versionId": "0c8c45a7-bb71-479c-aa1f-7530efb2bde5",
+    "workflowId": "oDf5y6iWAfbojygq",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "f908910d-cb4c-4382-a525-bcf1696af3b7",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "5c1209b4-6ee8-433d-b808-1b87157158a7",
+        "name": "Webhook-Receive Input",
+        "webhookId": "f908910d-cb4c-4382-a525-bcf1696af3b7"
+      },
+      {
+        "parameters": {
+          "jsCode": "const url = $json.body.youtube_url;\n\nif (!url) {\n  throw new Error(\"youtube_url not found\");\n}\n\n// handle multiple formats\nlet videoId = null;\n\n// standard format\nlet match = url.match(/v=([^&]+)/);\nif (match) {\n  videoId = match[1];\n}\n\n// short format (youtu.be)\nif (!videoId) {\n  match = url.match(/youtu\\.be\\/([^?]+)/);\n  if (match) videoId = match[1];\n}\n\nreturn [{\n  videoId,\n  originalUrl: url\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          0
+        ],
+        "id": "40930972-39a5-4021-8992-652f75cb1daa",
+        "name": "Extract Video-ID"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.apify.com/v2/actors/topaz_sharingan~youtube-transcript-scraper-1/run-sync-get-dataset-items?token=YOUR_APIFY_API_TOKEN",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "specifyHeaders": "json",
+          "jsonHeaders": "{\n  \"Content-Type\": \"application/json\"\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"startUrls\": [\n    {\n      \"url\": \"https://www.youtube.com/watch?v={{$json.videoId}}\"\n    }\n  ]\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          416,
+          0
+        ],
+        "id": "75ec0ccf-fe1d-4d34-a314-08e5fa71e7b9",
+        "name": "Fetch Video Meta-Data",
+        "credentials": {
+          "httpBearerAuth": {
+            "id": "XlEizMhtZ5gksiA4",
+            "name": "Bearer Auth account"
+          },
+          "httpHeaderAuth": {
+            "id": "ESiOPGJW150OHsro",
+            "name": "Header Auth account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "let text = $json.text;\n\n// basic cleanup\ntext = text.replace(/\\s+/g, ' ').trim();\n\n// optional: limit size (VERY IMPORTANT for AI)\ntext = text.slice(0, 8000);\n\nreturn [{\n  cleanTranscript: text,\n  title: $json.videoTitle\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          624,
+          0
+        ],
+        "id": "821c8029-3357-467a-897a-a6bdae3947ac",
+        "name": "Clean Transcript"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+          "sendHeaders": true,
+          "specifyHeaders": "json",
+          "jsonHeaders": "{\n  \"Authorization\": \"Bearer YOUR_NVIDIA_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"model\": \"meta/llama-3.1-70b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a strict JSON generator. Always return valid JSON only.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Analyze the following YouTube transcript and return ONLY JSON.\\n\\nTitle: {{$json.title}}\\n\\nTranscript:\\n{{$json.cleanTranscript}}\\n\\nReturn format:\\n{\\n  \\\"topic\\\": \\\"\\\",\\n  \\\"summary\\\": \\\"\\\",\\n  \\\"key_points\\\": [],\\n  \\\"hooks\\\": []\\n}\"\n    }\n  ],\n  \"temperature\": 0.2,\n  \"top_p\": 0.7,\n  \"max_tokens\": 1024,\n  \"stream\": false\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          832,
+          0
+        ],
+        "id": "0b1c8c16-986e-4ee0-8172-df5fad413477",
+        "name": "Generate Structured Content(Topic & Summary)"
+      },
+      {
+        "parameters": {
+          "jsCode": "const raw = $json.choices[0].message.content.trim();\n\n// extract JSON safely\nconst jsonStart = raw.indexOf(\"{\");\nconst jsonString = raw.slice(jsonStart);\n\nconst data = JSON.parse(jsonString);\n\nreturn [{\n  topic: data.topic,\n  summary: data.summary,\n  key_points: data.key_points,\n  hooks: data.hooks\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1040,
+          0
+        ],
+        "id": "06880a1c-fe2d-4947-bd1f-815dc2e028eb",
+        "name": "parse structured output"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+          "sendHeaders": true,
+          "specifyHeaders": "json",
+          "jsonHeaders": "{\n  \"Authorization\": \"Bearer YOUR_NVIDIA_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"model\": \"meta/llama-3.1-70b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ \n        'Write a professional LinkedIn post.\\\\n\\\\n' +\n        'Topic: ' + $json.topic + '\\\\n\\\\n' +\n        'Summary: ' + $json.summary + '\\\\n\\\\n' +\n        'Key Points:\\\\n' + ($json.key_points || []).join('\\\\n') + '\\\\n\\\\n' +\n        'Instructions:\\\\n' +\n        '- Start with strong hook\\\\n' +\n        '- Use bullet points\\\\n' +\n        '- Keep it professional\\\\n' +\n        '- Add a conclusion\\\\n' +\n        '- End with a question'\n      }}\"\n    }\n  ],\n  \"temperature\": 0.7,\n  \"top_p\": 0.7,\n  \"max_tokens\": 800\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1328,
+          -144
+        ],
+        "id": "0068d682-e66d-4bcd-b843-aba70cd1723d",
+        "name": "generate Linkedin Post"
+      },
+      {
+        "parameters": {
+          "jsCode": "const content = $json.choices[0].message.content;\n\nreturn [\n  {\n    linkedin_post: content\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1520,
+          -144
+        ],
+        "id": "b2292f80-b38f-47c8-9d22-2d09d14bbadb",
+        "name": "Parse Linkedin output"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+          "sendHeaders": true,
+          "specifyHeaders": "json",
+          "jsonHeaders": "{\n  \"Authorization\": \"Bearer YOUR_NVIDIA_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"model\": \"meta/llama-3.1-70b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ \n        'Create Instagram caption and reel script.\\\\n\\\\n' +\n        'Topic: ' + $json.topic + '\\\\n\\\\n' +\n        'Hooks:\\\\n' + ($json.hooks || []).join('\\\\n') + '\\\\n\\\\n' +\n        'Key Points:\\\\n' + ($json.key_points || []).join('\\\\n') + '\\\\n\\\\n' +\n        'Output format:\\\\n\\\\n' +\n        'Caption:\\\\n' +\n        '- Strong hook\\\\n' +\n        '- Short lines\\\\n' +\n        '- Emojis\\\\n' +\n        '- CTA (save/share/comment)\\\\n' +\n        '- 5 hashtags\\\\n\\\\n' +\n        'Reel Script:\\\\n' +\n        '- Hook (first 3 sec)\\\\n' +\n        '- 5 scenes\\\\n' +\n        '- Short lines\\\\n' +\n        '- Ending CTA'\n      }}\"\n    }\n  ],\n  \"temperature\": 0.8,\n  \"top_p\": 0.7,\n  \"max_tokens\": 1000\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1328,
+          64
+        ],
+        "id": "30b2104d-acff-40ff-8ce4-1bf1c60f353f",
+        "name": "generate instagram content"
+      },
+      {
+        "parameters": {
+          "jsCode": "const content = $json.choices[0].message.content;\n\nreturn [\n  {\n    instagram_output: content\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1536,
+          64
+        ],
+        "id": "1e5357be-7c88-49ba-bba6-1ccbe6c97556",
+        "name": "Parse instagram output"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+          "sendHeaders": true,
+          "specifyHeaders": "json",
+          "jsonHeaders": "{\n  \"Authorization\": \"Bearer YOUR_NVIDIA_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"model\": \"meta/llama-3.1-70b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ \n        'Create a viral Twitter thread.\\\\n\\\\n' +\n        'Topic: ' + $json.topic + '\\\\n\\\\n' +\n        'Key Points:\\\\n' + ($json.key_points || []).join('\\\\n') + '\\\\n\\\\n' +\n        'Instructions:\\\\n' +\n        '- 5 to 7 tweets\\\\n' +\n        '- Numbered (1/, 2/, etc.)\\\\n' +\n        '- Short and punchy\\\\n' +\n        '- Engaging tone\\\\n' +\n        '- Strong final tweet'\n      }}\"\n    }\n  ],\n  \"temperature\": 0.7,\n  \"top_p\": 0.7,\n  \"max_tokens\": 600\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1344,
+          272
+        ],
+        "id": "f70369ea-c318-40dd-86a9-3931552a0721",
+        "name": "generate twitter thread"
+      },
+      {
+        "parameters": {
+          "jsCode": "const content = $json.choices[0].message.content;\n\nreturn [\n  {\n    twitter_thread: content\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1552,
+          272
+        ],
+        "id": "d6fe914b-9f52-4345-9ed7-e310b7c02e8d",
+        "name": "parse twitter thread output"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://integrate.api.nvidia.com/v1/chat/completions",
+          "sendHeaders": true,
+          "specifyHeaders": "json",
+          "jsonHeaders": "{\n  \"Authorization\": \"Bearer YOUR_NVIDIA_API_KEY\",\n  \"Content-Type\": \"application/json\"\n}",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"model\": \"meta/llama-3.1-70b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ \n        'Write a detailed blog article.\\\\n\\\\n' +\n        'Topic: ' + $json.topic + '\\\\n\\\\n' +\n        'Summary: ' + $json.summary + '\\\\n\\\\n' +\n        'Key Points:\\\\n' + ($json.key_points || []).join('\\\\n') + '\\\\n\\\\n' +\n        'Structure:\\\\n' +\n        '- Title\\\\n' +\n        '- Introduction\\\\n' +\n        '- Sections with headings\\\\n' +\n        '- Conclusion'\n      }}\"\n    }\n  ],\n  \"temperature\": 0.7,\n  \"top_p\": 0.7,\n  \"max_tokens\": 1200\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1344,
+          480
+        ],
+        "id": "067dbd06-ef6b-47c9-8c05-9ece40037517",
+        "name": "generate blog content"
+      },
+      {
+        "parameters": {
+          "jsCode": "const content = $json.choices[0].message.content;\n\nreturn [\n  {\n    blog: content\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1552,
+          480
+        ],
+        "id": "f5fbad6b-8fce-4d33-a748-e2d115ff7683",
+        "name": "parse blog output"
+      },
+      {
+        "parameters": {
+          "numberInputs": 4
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1888,
+          80
+        ],
+        "id": "612b0ed2-6f27-4e2b-a5b8-0f8a7591b464",
+        "name": "Merge All content"
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\n\nlet result = {\n  linkedin: \"\",\n  instagram: \"\",\n  twitter: \"\",\n  blog: \"\"\n};\n\nfor (const item of items) {\n  if (item.json.linkedin_post) {\n    result.linkedin = item.json.linkedin_post;\n  }\n\n  if (item.json.instagram_output) {\n    result.instagram = item.json.instagram_output;\n  }\n\n  if (item.json.twitter_thread) {\n    result.twitter = item.json.twitter_thread;\n  }\n\n  if (item.json.blog) {\n    result.blog = item.json.blog;\n  }\n}\n\nreturn [result];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2096,
+          80
+        ],
+        "id": "40aa2a6a-b95d-4135-ba60-66a2b2092f14",
+        "name": "Prepare Final Output"
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $json.email }} ",
+          "subject": "AI Generated Content from YouTube 🚀",
+          "emailType": "text",
+          "message": "=LinkedIn:\n{{ $json.linkedin }}\n\n------------------------\n\nInstagram:\n{{$json.instagram}}\n\n------------------------\n\nTwitter:\n{{$json.twitter}}\n\n------------------------\n\nBlog:\n{{$json.blog}}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          2288,
+          -64
+        ],
+        "id": "d190da06-486d-4e92-9b63-cee740f356b1",
+        "name": "Send email to user",
+        "webhookId": "6b9cd53b-ae8c-47cf-ac7d-08413dc57a74",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "dJo19xe1bVod4Y6k",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\n\nlet email = \"\";\nlet content = {\n  linkedin: \"\",\n  instagram: \"\",\n  twitter: \"\",\n  blog: \"\"\n};\n\nfor (const item of items) {\n  if (item.json.body?.email) {\n    email = item.json.body.email;\n  }\n\n  if (item.json.linkedin) content.linkedin = item.json.linkedin;\n  if (item.json.instagram) content.instagram = item.json.instagram;\n  if (item.json.twitter) content.twitter = item.json.twitter;\n  if (item.json.blog) content.blog = item.json.blog;\n}\n\nreturn [\n  {\n    email,\n    ...content\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1456,
+          -400
+        ],
+        "id": "86b63056-cb09-45a0-84b1-76ffd20c1bf8",
+        "name": "prepare email data"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1248,
+          -400
+        ],
+        "id": "4be369b5-93fd-4358-ad1c-6e897e8c2eab",
+        "name": "Combine Input + Content for Email"
+      },
+      {
+        "parameters": {
+          "content": "Webhook Input\n\nSend a POST request:\n\n{\n  \"youtube_url\": \"https://youtube.com/watch?v=VIDEO_ID\",\n  \"email\": \"your@email.com\"\n}"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -64,
+          -304
+        ],
+        "typeVersion": 1,
+        "id": "366a1cc5-eff8-454a-81fe-2d5cfb1b7890",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "content": "Apify API (YouTube Transcript) — Required\n\nThis workflow uses:\n\n👉 Actor: starvibe~youtube-video-transcript\n\nSteps:\nGo to: https://apify.com/starvibe/youtube-video-transcript\nClick Try for free\nCopy your Apify API Token\nAdd in n8n:\nOpen Transcript HTTP Request node\nSet URL:\nhttps://api.apify.com/v2/actors/starvibe~youtube-video-transcript/run-sync-get-d"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          368,
+          -304
+        ],
+        "typeVersion": 1,
+        "id": "4ba15e6a-0d9b-49b7-92ab-c3df46e04766",
+        "name": "Sticky Note1"
+      },
+      {
+        "parameters": {
+          "content": "LLM API (Content Generation) — Required\n\nThis workflow uses:\n\n👉 Provider: NVIDIA API\n👉 Model: meta/llama-3.1-70b-instruct\n\nSteps:\nGo to: https://build.nvidia.com/\nGenerate API Key\nAdd in n8n:\nOpen all AI HTTP Request nodes\nSet:\nPOST https://integrate.api.nvidia.com/v1/chat/completions\nHeaders:\nAuthorization: Bearer YOUR_NVIDIA_API_KEY\nContent-Type: application/json"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          768,
+          352
+        ],
+        "typeVersion": 1,
+        "id": "b314a515-25c3-4fd2-a903-7688a2642208",
+        "name": "Sticky Note2"
+      }
+    ],
+    "connections": {
+      "Webhook-Receive Input": {
+        "main": [
+          [
+            {
+              "node": "Extract Video-ID",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Combine Input + Content for Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Video-ID": {
+        "main": [
+          [
+            {
+              "node": "Fetch Video Meta-Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Video Meta-Data": {
+        "main": [
+          [
+            {
+              "node": "Clean Transcript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Clean Transcript": {
+        "main": [
+          [
+            {
+              "node": "Generate Structured Content(Topic & Summary)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Structured Content(Topic & Summary)": {
+        "main": [
+          [
+            {
+              "node": "parse structured output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "parse structured output": {
+        "main": [
+          [
+            {
+              "node": "generate Linkedin Post",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "generate instagram content",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "generate twitter thread",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "generate blog content",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "generate Linkedin Post": {
+        "main": [
+          [
+            {
+              "node": "Parse Linkedin output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Linkedin output": {
+        "main": [
+          [
+            {
+              "node": "Merge All content",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "generate instagram content": {
+        "main": [
+          [
+            {
+              "node": "Parse instagram output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse instagram output": {
+        "main": [
+          [
+            {
+              "node": "Merge All content",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "generate twitter thread": {
+        "main": [
+          [
+            {
+              "node": "parse twitter thread output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "parse twitter thread output": {
+        "main": [
+          [
+            {
+              "node": "Merge All content",
+              "type": "main",
+              "index": 2
+            }
+          ]
+        ]
+      },
+      "generate blog content": {
+        "main": [
+          [
+            {
+              "node": "parse blog output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "parse blog output": {
+        "main": [
+          [
+            {
+              "node": "Merge All content",
+              "type": "main",
+              "index": 3
+            }
+          ]
+        ]
+      },
+      "Merge All content": {
+        "main": [
+          [
+            {
+              "node": "Prepare Final Output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Final Output": {
+        "main": [
+          [
+            {
+              "node": "Combine Input + Content for Email",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "prepare email data": {
+        "main": [
+          [
+            {
+              "node": "Send email to user",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Combine Input + Content for Email": {
+        "main": [
+          [
+            {
+              "node": "prepare email data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Chandu M",
+    "name": "AI YouTube Content Repurposer (LinkedIn, Instagram, Twitter, Blog + Email)",
+    "description": "Convert any YouTube video into multi-platform content using AI.\n\nThis workflow:\n• Extracts transcript using Apify\n• Generates structured insights using LLM\n• Creates content for:\n  - LinkedIn\n  - Instagram (caption + reel)\n  - Twitter thread\n  - Blog article\n• Sends everything directly to your email\n\nPerfect for creators, marketers, and developers.",
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-10T09:17:03.939Z",
+        "id": 7,
+        "workflowId": "oDf5y6iWAfbojygq",
+        "versionId": "0c8c45a7-bb71-479c-aa1f-7530efb2bde5",
+        "event": "activated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    ]
+  },
+  "scopes": [
+    "execution:reveal",
+    "workflow:create",
+    "workflow:delete",
+    "workflow:disableRedaction",
+    "workflow:enableRedaction",
+    "workflow:execute",
+    "workflow:execute-chat",
+    "workflow:export",
+    "workflow:list",
+    "workflow:move",
+    "workflow:publish",
+    "workflow:read",
+    "workflow:share",
+    "workflow:unpublish",
+    "workflow:unshare",
+    "workflow:update"
+  ],
+  "checksum": "52d3e2115edf68776c985f69175505fb8cba690d386852d0e835c094d57e03a8"
+}
