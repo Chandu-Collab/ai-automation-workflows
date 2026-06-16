@@ -19,6 +19,20 @@
 
 ## 🔥 Workflows
 
+🌍 Multilingual AI Customer Support Bot (NEW 🔥)
+
+Automates customer support using AI agents with multilingual capabilities.
+
+✨ Features:
+
+🌐 Detects user language (Hindi, Telugu, English, etc.)
+🔤 Translates messages for processing
+🧠 Classifies intent (Refund, Technical Issue, Complaint)
+💬 Auto-replies OR escalates based on urgency
+🔁 Replies back in the user's original language
+
+📁 Folder: [Multilingual AI Customer Support Automation](./workflows/Multilingual AI Customer Support Automation/)
+
 ### 🧠 AI Resume-Based Job Matching Agent
 
 Finds relevant jobs based on a user's resume and sends them via email.
@@ -79,6 +93,7 @@ ai-automation-workflows/
 ├── workflows/lead-capture-agent/
 ├── workflows/job-matching-agent/
 ├── workflows/ai-youtube-content-repurposer/
+├── workflows/Multilingual AI Customer Support Automation/
 ```
 
 ---
