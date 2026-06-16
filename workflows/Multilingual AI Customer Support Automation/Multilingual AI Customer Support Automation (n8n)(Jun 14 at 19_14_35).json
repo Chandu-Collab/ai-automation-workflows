@@ -1,0 +1,2012 @@
+{
+  "updatedAt": "2026-06-14T13:44:35.899Z",
+  "createdAt": "2026-06-13T10:00:10.859Z",
+  "id": "3lA7apPDi9yHf1SX",
+  "name": "Multilingual AI Customer Support Automation (n8n)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-oss-20b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        208
+      ],
+      "id": "0df4f9cf-3af7-4456-a047-07846e275b1b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-oss-20b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1296,
+        288
+      ],
+      "id": "78ba50a1-d58e-42a8-b333-af5120577c71",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-oss-20b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1760,
+        272
+      ],
+      "id": "a6c71a7f-7d2f-40d3-ae74-5b71bbf528f2",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-oss-20b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2656,
+        464
+      ],
+      "id": "c38bbd3c-66ab-4661-9bac-8c706589abb4",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-oss-20b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        3120,
+        432
+      ],
+      "id": "ce2bac98-674b-4a47-b83e-d700bb28bae1",
+      "name": "OpenAI Chat Model4",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "maxResults": 1,
+        "filters": {
+          "sender": "your_email@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ad875d0e-5e64-400a-8a77-69ec335b6541",
+      "name": "Gmail Input Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "23b54442-1c28-474f-b98f-ad89bb737237",
+              "name": "message",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "4f1f3e23-c0f9-423d-a86e-4aac67baf464",
+              "name": "email",
+              "value": "={{ $json.from.value[0].address }}",
+              "type": "string"
+            },
+            {
+              "id": "def0d59f-ff42-4d26-b8fe-d28521b07df9",
+              "name": "subject",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "655f30db-3fd1-4f1b-ba84-36981286fdfb",
+              "name": "start_time",
+              "value": "={{$now}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "be4e2433-f0cd-4ecd-ba65-85e56f3dc413",
+      "name": "Normalize Email Data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Detect the language of the following message:\n\n{{ $json.message }}",
+        "options": {
+          "systemMessage": "You are a language detection system.\n\nYour task is to:\n1. Identify the primary language of the input text\n2. Return the result in strict JSON format\n\nRules:\n- Output ONLY valid JSON\n- Do NOT include any explanation\n- Do NOT include markdown or backticks\n- Do NOT include extra text before or after JSON\n- Language must be ISO code (en, hi, te, ta, kn, etc.)\n- Confidence must be a number between 0 and 1\n\nOutput format:\n{\n  \"language\": \"en\",\n  \"confidence\": 0.4\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "c1145984-2e2c-4e9d-9145-a73109dc7a14",
+      "name": "Language Detection Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($json.output);\n\nreturn [\n  {\n    ...$json,\n    message: $node[\"Normalize Email Data\"].json.message,\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject,\n    language: parsed.language,\n    confidence: Number(parsed.confidence)\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "73b0260b-38ed-4fe5-a393-07c71d046e73",
+      "name": "Parse Language+Confidence"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef42e406-118c-450e-8d04-db332e7ca68c",
+              "leftValue": "={{$json.confidence}}",
+              "rightValue": "=0.7",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        0
+      ],
+      "id": "83e99598-2426-4ff9-8be8-734e93302af4",
+      "name": "Language Confidence check"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "05e4057e-a431-4366-b6f7-9b31ce365cc8",
+              "name": "language",
+              "value": "en",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1184,
+        -112
+      ],
+      "id": "66c7cadc-8b75-456f-b3a9-07ce43f491ea",
+      "name": "Fall back to English"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Translate this text to English:\n\n{{ $json.message }}",
+        "options": {
+          "systemMessage": "You are a translation system.\n\nYour task:\n- Translate the given input text into English.\n\nRules:\n- Output ONLY the translated English text\n- Do NOT include explanations\n- Do NOT include JSON\n- Do NOT include quotes\n- Do NOT include extra text\n\nIf the input is already English, return it unchanged."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1248,
+        96
+      ],
+      "id": "c62c45c0-4f38-451e-9ff6-a2d54d67808a",
+      "name": "Translate to English"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    translated_text: $json.output,\n    message: $node[\"Normalize Email Data\"].json.message.trim(),\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject,\n    language: $node[\"Parse Language+Confidence\"].json.language // 👈 restore from earlier node\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        96
+      ],
+      "id": "5ad2318d-9400-4af8-be62-0e835a661b38",
+      "name": "Structure translated Data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Classify this customer query:\n\n{{ $json.translated_text }}",
+        "options": {
+          "systemMessage": "You are a customer support classification system.\n\nYour task:\n1. Classify the user query into one category\n2. Assign a confidence score (0 to 1)\n3. Determine urgency level\n\nRules:\n- Output ONLY valid JSON\n- Do NOT include explanation\n- Do NOT include markdown or backticks\n- Do NOT include extra text\n\nCategories:\n- Pricing\n- Technical Issue\n- Refund\n- Complaint\n- General Inquiry\n\nUrgency levels:\n- Low\n- Medium\n- High\n\nOutput format:\n{\n  \"category\": \"Refund\",\n  \"confidence\": 0.9,\n  \"urgency\": \"Medium\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1808,
+        96
+      ],
+      "id": "2ed94df9-c082-4147-862f-aeed0c778631",
+      "name": "Classification Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($json.output);\n\nreturn [\n  {\n    ...$json,\n    category: parsed.category,\n    classification_confidence: Number(parsed.confidence),\n    urgency: parsed.urgency\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        96
+      ],
+      "id": "29e0c903-35bb-4b7c-9a16-c95bd7d8a1ca",
+      "name": "Parse Classification output"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0d6771dd-4487-4204-a240-dd02040f0b82",
+              "leftValue": "={{ $json.urgency }}",
+              "rightValue": "High",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b5a3913d-2d52-4fe2-89fa-2841191056a4",
+              "leftValue": "={{ $json.classification_confidence }}",
+              "rightValue": 0.6,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2368,
+        96
+      ],
+      "id": "be8a619b-b1e9-4981-a479-75ca6d3d6837",
+      "name": "Decision: Auto Reply vs Escalate"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    ...$json,\n    message: $node[\"Normalize Email Data\"].json.message,\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject,\n    translated_text: $node[\"Structure translated Data\"].json.translated_text,\n    language: $node[\"Structure translated Data\"].json.language\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2576,
+        0
+      ],
+      "id": "5ad5892f-3023-4b3e-bf50-58b49c57f0a3",
+      "name": "Restore Full Context (Escalation)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "51cc75fb-bf66-4f2c-a351-71acc995c0fe",
+              "name": "=escalation_reason",
+              "value": "=High urgency or low confidence",
+              "type": "string"
+            },
+            {
+              "id": "84908aa6-b42a-4735-9f2d-fe6cf667cdc7",
+              "name": "=status ",
+              "value": "Escalated",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2784,
+        0
+      ],
+      "id": "67d43512-3671-4960-9d1d-6ba5f4e24346",
+      "name": "Add Escalation Meta Data"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=🚨 Escalation: {{$json.category}}",
+        "emailType": "text",
+        "message": "=New support request requires attention: \nMessage: {{$json.message.trim()}}\nCategory: {{$json.category}} \nUrgency: {{$json.urgency}} \nConfidence: {{$json.classification_confidence}}  \nUser Email: {{$json.email}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2992,
+        0
+      ],
+      "id": "43a5ea59-3fff-4f4a-b4bc-807f3c555f45",
+      "name": "Send Escalation Email",
+      "webhookId": "8fea43e2-0ec8-46bd-b415-4c0666b86edb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    ...$json,\n    message: $node[\"Normalize Email Data\"].json.message.trim(),\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject,\n    translated_text: $node[\"Structure translated Data\"].json.translated_text,\n    language: $node[\"Structure translated Data\"].json.language\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2496,
+        272
+      ],
+      "id": "e3287090-2e0a-41bd-87ec-852c9b902534",
+      "name": "Restore Full Context(Reply)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Category: {{$json.category}}\n\nUser Message: {{$json.translated_text}}",
+        "options": {
+          "systemMessage": "You are a customer support assistant.\n\nYour task:\n- Generate a helpful reply to the user's query.\n\nRules:\n- Be polite and professional\n- Keep response short (2–3 lines)\n- Do not include explanation\n- Do not include JSON\n- Do not include extra text\n- Do not mention links or pages unless explicitly provided."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2688,
+        256
+      ],
+      "id": "13d96f38-5adb-43e4-ba2e-18d55d59f9e2",
+      "name": "Generate Reply"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    reply: $json.output,\n    message: $node[\"Normalize Email Data\"].json.message.trim(),\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject, \n    translated_text: $node[\"Structure translated Data\"].json.translated_text,\n    language: $node[\"Structure translated Data\"].json.language\n    \n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3040,
+        224
+      ],
+      "id": "c26af0ec-9010-44b9-95af-fbe3acb4adf2",
+      "name": "Structure reply data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Translate this into {{$json.language}}:\n\n{{$json.reply}}",
+        "options": {
+          "systemMessage": "You are a translation system.\n\nYour task:\n- Translate the given English text into the target language.\n\nRules:\n- Output ONLY translated text\n- Do NOT include explanation\n- Do NOT include extra text"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        3248,
+        224
+      ],
+      "id": "2fc54d51-e91a-4a7b-89fd-5b3db706996e",
+      "name": "Translate reply to user language"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    reply: $json.output, // translated reply\n    message: $node[\"Normalize Email Data\"].json.message.trim(),\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject,\n    category: $node[\"Parse Classification output\"].json.category,\n    language: $node[\"Structure translated Data\"].json.language\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3568,
+        240
+      ],
+      "id": "d0b44c83-18eb-4ace-94a6-613272d71a1c",
+      "name": "Final Email Formator"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.email}}",
+        "subject": "=Re: {{$json.subject}}",
+        "emailType": "text",
+        "message": "={{$json.reply}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3760,
+        208
+      ],
+      "id": "e642eaee-c5a1-41b4-9378-185bac1d8ab4",
+      "name": "Send Reply to User",
+      "webhookId": "43d1fa38-4c0a-47d6-8d91-74770dc4b146",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📩 Gmail Input Setup\n\nThis workflow listens to incoming emails.\n\nSteps:\n1. Connect your Gmail account\n2. Enable read access (Inbox)\n3. Set polling (Every 1 min recommended)\n\nTest:\nSend an email like:\n\"I want a refund\"",
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -64,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "e8e2f9aa-c353-43aa-9e32-39eeabb7890f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "🤖 AI Model Setup\n\nThis workflow uses AI agents.\n\nRequired:\n- OpenAI API Key (or compatible LLM)\n\nSteps:\n1. Open each AI Agent node\n2. Select your model\n3. Add API credentials\n\nAgents Used:\n- Language Detection\n- Translation\n- Classification\n- Reply Generator",
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        416,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "f1940557-80e4-4813-acdf-7924f12da423",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "🌐 Language Processing\n\nFlow:\n1. Detect language\n2. Translate to English\n3. Process request\n4. Translate reply back\n\nSupported:\n- Hindi\n- Telugu\n- English\n- Other major languages\n\nNote:\nSingle language per email works best",
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1248,
+        -336
+      ],
+      "typeVersion": 1,
+      "id": "25f75cf4-57c9-4faa-8a8a-8e5e551e6bd8",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "🚦 Decision Logic\n\nAuto Reply:\n- Confidence ≥ 0.6\n- Urgency ≠ High\n\nEscalation:\n- Urgency = High\nOR\n- Confidence < 0.6\n\nOutput:\n- Reply to user OR\n- Send alert to admin",
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1792,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "0edf2ab4-58eb-4a48-b023-3bc81f79654e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "📤 Email Output\n\nAuto Reply:\n- Sent to user email\n- Same language as input\n\nEscalation:\n- Sent to admin\n- Includes full details\n\nMake sure:\nGmail send node is configured",
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2944,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "968f7fc9-ae5d-40c9-8158-f2cdcaeae283",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "🧪 Testing\n\nTry these inputs:\n\nEnglish:\n\"I want a refund\"\n\nHindi:\n\"मुझे मेरा पैसा वापस चाहिए\"\n\nTelugu:\n\"నాకు నా డబ్బు తిరిగి కావాలి\"\n\nExpected:\n- Correct classification\n- Proper reply\n- Language preserved",
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        384
+      ],
+      "typeVersion": 1,
+      "id": "3455b712-42a0-4080-8a91-aae37fbe8075",
+      "name": "Sticky Note5"
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Language Detection Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Translate to English",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classification Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Reply",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Translate reply to user language",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Input Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Email Data": {
+      "main": [
+        [
+          {
+            "node": "Language Detection Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Language Detection Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Language+Confidence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Language+Confidence": {
+      "main": [
+        [
+          {
+            "node": "Language Confidence check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Language Confidence check": {
+      "main": [
+        [
+          {
+            "node": "Fall back to English",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Translate to English",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fall back to English": {
+      "main": [
+        []
+      ]
+    },
+    "Translate to English": {
+      "main": [
+        [
+          {
+            "node": "Structure translated Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure translated Data": {
+      "main": [
+        [
+          {
+            "node": "Classification Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classification Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Classification output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Classification output": {
+      "main": [
+        [
+          {
+            "node": "Decision: Auto Reply vs Escalate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decision: Auto Reply vs Escalate": {
+      "main": [
+        [
+          {
+            "node": "Restore Full Context (Escalation)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Restore Full Context(Reply)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Full Context (Escalation)": {
+      "main": [
+        [
+          {
+            "node": "Add Escalation Meta Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Escalation Meta Data": {
+      "main": [
+        [
+          {
+            "node": "Send Escalation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Full Context(Reply)": {
+      "main": [
+        [
+          {
+            "node": "Generate Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Reply": {
+      "main": [
+        [
+          {
+            "node": "Structure reply data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure reply data": {
+      "main": [
+        [
+          {
+            "node": "Translate reply to user language",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate reply to user language": {
+      "main": [
+        [
+          {
+            "node": "Final Email Formator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Email Formator": {
+      "main": [
+        [
+          {
+            "node": "Send Reply to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true,
+    "timeSavedPerExecution": 10
+  },
+  "staticData": {
+    "node:Gmail Input Trigger": {
+      "Gmail Input Trigger": {
+        "lastTimeChecked": 1781455162,
+        "possibleDuplicates": [
+          "19ec7008cea2fc1b",
+          "19ecb44840abcac8",
+          "19ecb439fd94470b",
+          "19ecb42b5de76c14",
+          "19ecb41cbb7bf99e",
+          "19ecb40f3be324de",
+          "19ecb3ffdf940232"
+        ],
+        "pendingMessageIds": [
+          "19ecb3f0f5e6c4e3",
+          "19ecb3e416d3b16d",
+          "19ecb3dd20631504",
+          "19ec77788c460a45",
+          "19ec776a6bd00553",
+          "19ec774ce04cc383",
+          "19ec773db5e74f75",
+          "19ec772f9d68ae44",
+          "19ec7720c4ba98ac",
+          "19ec77129bf86872",
+          "19ec77039ce2c821",
+          "19ec76f48fe13050",
+          "19ec76e5f4214cb4",
+          "19ec76d7922a06a1",
+          "19ec76c93d852c33",
+          "19ec76bb0450ec2d",
+          "19ec76ab884e7790",
+          "19ec769cfbbc7bc5",
+          "19ec768e3086bcb2",
+          "19ec76805df28bf4",
+          "19ec76710f8faf2c",
+          "19ec766274378250",
+          "19ec7653e9b41b8a",
+          "19ec7644f67855ff",
+          "19ec7639185becf2",
+          "19ec762929ec2e72",
+          "19ec76195fde3a49",
+          "19ec760a6c66d2aa",
+          "19ec75fba0a722b8",
+          "19ec75ed2c6a51d3",
+          "19ec75df420b9356",
+          "19ec75d04f7567fa",
+          "19ec75c11b95831d",
+          "19ec75b2ccfba486",
+          "19ec75a3a2e2ab29",
+          "19ec759503a428ce",
+          "19ec7586ddc2d261",
+          "19ec7577f216af92",
+          "19ec7569b9292fac",
+          "19ec755a9383499c",
+          "19ec754b8425cac7",
+          "19ec753d3db0d623",
+          "19ec752e89f2590b",
+          "19ec752045701152",
+          "19ec751297e806ea",
+          "19ec75029b88cd0e",
+          "19ec74f3dace2cda",
+          "19ec74e57b106471",
+          "19ec74d6b86498e1",
+          "19ec74c802b0bd3a",
+          "19ec74b9bf708a7e",
+          "19ec74ad0706a36b",
+          "19ec749bdb7f7c61",
+          "19ec748dceb012c8",
+          "19ec747f3c5d9149",
+          "19ec74707c7f8609",
+          "19ec746182d3044e",
+          "19ec745324ea03b8",
+          "19ec74448c2f083f",
+          "19ec7435eba9e14b",
+          "19ec7426a9d7216e",
+          "19ec74187cff8b9c",
+          "19ec74098a60b38b",
+          "19ec73fb13aa2e5f",
+          "19ec73ec439cd80a",
+          "19ec73dd290b8ca8",
+          "19ec73cfedfb0ce6",
+          "19ec73c0882b7ba3"
+        ]
+      }
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "465fec38-b62f-4e64-ba00-cdafb853f6d5",
+  "activeVersionId": "465fec38-b62f-4e64-ba00-cdafb853f6d5",
+  "versionCounter": 345,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-06-13T10:00:10.867Z",
+      "createdAt": "2026-06-13T10:00:10.867Z",
+      "role": "workflow:owner",
+      "workflowId": "3lA7apPDi9yHf1SX",
+      "projectId": "loWf0mBs1xKuh5N3",
+      "project": {
+        "updatedAt": "2026-06-04T07:55:05.260Z",
+        "createdAt": "2026-06-04T07:52:41.897Z",
+        "id": "loWf0mBs1xKuh5N3",
+        "name": "Chandu M <your_email@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2026-06-09T06:33:27.317Z",
+      "createdAt": "2026-06-09T06:33:27.317Z",
+      "id": "8ZUaEfWmhomQ0P8p",
+      "name": "n8n"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:15.749Z",
+      "createdAt": "2026-06-09T06:33:15.749Z",
+      "id": "OqenQjr9s45g7AEO",
+      "name": "ai"
+    },
+    {
+      "updatedAt": "2026-06-14T09:43:35.128Z",
+      "createdAt": "2026-06-14T09:43:35.128Z",
+      "id": "UUVDmqnlelP41qT2",
+      "name": "Email Automation"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:22.379Z",
+      "createdAt": "2026-06-09T06:33:22.379Z",
+      "id": "aM91rNGq256NAUAN",
+      "name": "automation"
+    },
+    {
+      "updatedAt": "2026-06-14T09:43:26.467Z",
+      "createdAt": "2026-06-14T09:43:26.467Z",
+      "id": "fVzgPElJv7s6nFjW",
+      "name": "Customer Support"
+    }
+  ],
+  "parentFolder": null,
+  "activeVersion": {
+    "updatedAt": "2026-06-14T13:45:19.000Z",
+    "createdAt": "2026-06-14T13:44:35.902Z",
+    "versionId": "465fec38-b62f-4e64-ba00-cdafb853f6d5",
+    "workflowId": "3lA7apPDi9yHf1SX",
+    "nodes": [
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openai/gpt-oss-20b",
+            "mode": "list",
+            "cachedResultName": "openai/gpt-oss-20b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          288,
+          208
+        ],
+        "id": "0df4f9cf-3af7-4456-a047-07846e275b1b",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openai/gpt-oss-20b",
+            "mode": "list",
+            "cachedResultName": "openai/gpt-oss-20b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1296,
+          288
+        ],
+        "id": "78ba50a1-d58e-42a8-b333-af5120577c71",
+        "name": "OpenAI Chat Model1",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openai/gpt-oss-20b",
+            "mode": "list",
+            "cachedResultName": "openai/gpt-oss-20b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1760,
+          272
+        ],
+        "id": "a6c71a7f-7d2f-40d3-ae74-5b71bbf528f2",
+        "name": "OpenAI Chat Model2",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openai/gpt-oss-20b",
+            "mode": "list",
+            "cachedResultName": "openai/gpt-oss-20b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          2656,
+          464
+        ],
+        "id": "c38bbd3c-66ab-4661-9bac-8c706589abb4",
+        "name": "OpenAI Chat Model3",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openai/gpt-oss-20b",
+            "mode": "list",
+            "cachedResultName": "openai/gpt-oss-20b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          3120,
+          432
+        ],
+        "id": "ce2bac98-674b-4a47-b83e-d700bb28bae1",
+        "name": "OpenAI Chat Model4",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "pollTimes": {
+            "item": [
+              {
+                "mode": "everyMinute"
+              }
+            ]
+          },
+          "simple": false,
+          "maxResults": 1,
+          "filters": {
+            "sender": "your_email@gmail.com"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmailTrigger",
+        "typeVersion": 1.4,
+        "position": [
+          0,
+          0
+        ],
+        "id": "ad875d0e-5e64-400a-8a77-69ec335b6541",
+        "name": "Gmail Input Trigger",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "23b54442-1c28-474f-b98f-ad89bb737237",
+                "name": "message",
+                "value": "={{ $json.text }}",
+                "type": "string"
+              },
+              {
+                "id": "4f1f3e23-c0f9-423d-a86e-4aac67baf464",
+                "name": "email",
+                "value": "={{ $json.from.value[0].address }}",
+                "type": "string"
+              },
+              {
+                "id": "def0d59f-ff42-4d26-b8fe-d28521b07df9",
+                "name": "subject",
+                "value": "={{ $json.subject }}",
+                "type": "string"
+              },
+              {
+                "id": "655f30db-3fd1-4f1b-ba84-36981286fdfb",
+                "name": "start_time",
+                "value": "={{$now}}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          208,
+          0
+        ],
+        "id": "be4e2433-f0cd-4ecd-ba65-85e56f3dc413",
+        "name": "Normalize Email Data"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Detect the language of the following message:\n\n{{ $json.message }}",
+          "options": {
+            "systemMessage": "You are a language detection system.\n\nYour task is to:\n1. Identify the primary language of the input text\n2. Return the result in strict JSON format\n\nRules:\n- Output ONLY valid JSON\n- Do NOT include any explanation\n- Do NOT include markdown or backticks\n- Do NOT include extra text before or after JSON\n- Language must be ISO code (en, hi, te, ta, kn, etc.)\n- Confidence must be a number between 0 and 1\n\nOutput format:\n{\n  \"language\": \"en\",\n  \"confidence\": 0.4\n}"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          416,
+          0
+        ],
+        "id": "c1145984-2e2c-4e9d-9145-a73109dc7a14",
+        "name": "Language Detection Agent"
+      },
+      {
+        "parameters": {
+          "jsCode": "const parsed = JSON.parse($json.output);\n\nreturn [\n  {\n    ...$json,\n    message: $node[\"Normalize Email Data\"].json.message,\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject,\n    language: parsed.language,\n    confidence: Number(parsed.confidence)\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          768,
+          0
+        ],
+        "id": "73b0260b-38ed-4fe5-a393-07c71d046e73",
+        "name": "Parse Language+Confidence"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "ef42e406-118c-450e-8d04-db332e7ca68c",
+                "leftValue": "={{$json.confidence}}",
+                "rightValue": "=0.7",
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          976,
+          0
+        ],
+        "id": "83e99598-2426-4ff9-8be8-734e93302af4",
+        "name": "Language Confidence check"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "05e4057e-a431-4366-b6f7-9b31ce365cc8",
+                "name": "language",
+                "value": "en",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1184,
+          -112
+        ],
+        "id": "66c7cadc-8b75-456f-b3a9-07ce43f491ea",
+        "name": "Fall back to English"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Translate this text to English:\n\n{{ $json.message }}",
+          "options": {
+            "systemMessage": "You are a translation system.\n\nYour task:\n- Translate the given input text into English.\n\nRules:\n- Output ONLY the translated English text\n- Do NOT include explanations\n- Do NOT include JSON\n- Do NOT include quotes\n- Do NOT include extra text\n\nIf the input is already English, return it unchanged."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1248,
+          96
+        ],
+        "id": "c62c45c0-4f38-451e-9ff6-a2d54d67808a",
+        "name": "Translate to English"
+      },
+      {
+        "parameters": {
+          "jsCode": "return [\n  {\n    translated_text: $json.output,\n    message: $node[\"Normalize Email Data\"].json.message.trim(),\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject,\n    language: $node[\"Parse Language+Confidence\"].json.language // 👈 restore from earlier node\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1600,
+          96
+        ],
+        "id": "5ad2318d-9400-4af8-be62-0e835a661b38",
+        "name": "Structure translated Data"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Classify this customer query:\n\n{{ $json.translated_text }}",
+          "options": {
+            "systemMessage": "You are a customer support classification system.\n\nYour task:\n1. Classify the user query into one category\n2. Assign a confidence score (0 to 1)\n3. Determine urgency level\n\nRules:\n- Output ONLY valid JSON\n- Do NOT include explanation\n- Do NOT include markdown or backticks\n- Do NOT include extra text\n\nCategories:\n- Pricing\n- Technical Issue\n- Refund\n- Complaint\n- General Inquiry\n\nUrgency levels:\n- Low\n- Medium\n- High\n\nOutput format:\n{\n  \"category\": \"Refund\",\n  \"confidence\": 0.9,\n  \"urgency\": \"Medium\"\n}"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1808,
+          96
+        ],
+        "id": "2ed94df9-c082-4147-862f-aeed0c778631",
+        "name": "Classification Agent"
+      },
+      {
+        "parameters": {
+          "jsCode": "const parsed = JSON.parse($json.output);\n\nreturn [\n  {\n    ...$json,\n    category: parsed.category,\n    classification_confidence: Number(parsed.confidence),\n    urgency: parsed.urgency\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2160,
+          96
+        ],
+        "id": "29e0c903-35bb-4b7c-9a16-c95bd7d8a1ca",
+        "name": "Parse Classification output"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "0d6771dd-4487-4204-a240-dd02040f0b82",
+                "leftValue": "={{ $json.urgency }}",
+                "rightValue": "High",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              },
+              {
+                "id": "b5a3913d-2d52-4fe2-89fa-2841191056a4",
+                "leftValue": "={{ $json.classification_confidence }}",
+                "rightValue": 0.6,
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                }
+              }
+            ],
+            "combinator": "or"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          2368,
+          96
+        ],
+        "id": "be8a619b-b1e9-4981-a479-75ca6d3d6837",
+        "name": "Decision: Auto Reply vs Escalate"
+      },
+      {
+        "parameters": {
+          "jsCode": "return [\n  {\n    ...$json,\n    message: $node[\"Normalize Email Data\"].json.message,\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject,\n    translated_text: $node[\"Structure translated Data\"].json.translated_text,\n    language: $node[\"Structure translated Data\"].json.language\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2576,
+          0
+        ],
+        "id": "5ad5892f-3023-4b3e-bf50-58b49c57f0a3",
+        "name": "Restore Full Context (Escalation)"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "51cc75fb-bf66-4f2c-a351-71acc995c0fe",
+                "name": "=escalation_reason",
+                "value": "=High urgency or low confidence",
+                "type": "string"
+              },
+              {
+                "id": "84908aa6-b42a-4735-9f2d-fe6cf667cdc7",
+                "name": "=status ",
+                "value": "Escalated",
+                "type": "string"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2784,
+          0
+        ],
+        "id": "67d43512-3671-4960-9d1d-6ba5f4e24346",
+        "name": "Add Escalation Meta Data"
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $json.email }}",
+          "subject": "=🚨 Escalation: {{$json.category}}",
+          "emailType": "text",
+          "message": "=New support request requires attention: \nMessage: {{$json.message.trim()}}\nCategory: {{$json.category}} \nUrgency: {{$json.urgency}} \nConfidence: {{$json.classification_confidence}}  \nUser Email: {{$json.email}}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          2992,
+          0
+        ],
+        "id": "43a5ea59-3fff-4f4a-b4bc-807f3c555f45",
+        "name": "Send Escalation Email",
+        "webhookId": "8fea43e2-0ec8-46bd-b415-4c0666b86edb",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "return [\n  {\n    ...$json,\n    message: $node[\"Normalize Email Data\"].json.message.trim(),\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject,\n    translated_text: $node[\"Structure translated Data\"].json.translated_text,\n    language: $node[\"Structure translated Data\"].json.language\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2496,
+          272
+        ],
+        "id": "e3287090-2e0a-41bd-87ec-852c9b902534",
+        "name": "Restore Full Context(Reply)"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Category: {{$json.category}}\n\nUser Message: {{$json.translated_text}}",
+          "options": {
+            "systemMessage": "You are a customer support assistant.\n\nYour task:\n- Generate a helpful reply to the user's query.\n\nRules:\n- Be polite and professional\n- Keep response short (2–3 lines)\n- Do not include explanation\n- Do not include JSON\n- Do not include extra text\n- Do not mention links or pages unless explicitly provided."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          2688,
+          256
+        ],
+        "id": "13d96f38-5adb-43e4-ba2e-18d55d59f9e2",
+        "name": "Generate Reply"
+      },
+      {
+        "parameters": {
+          "jsCode": "return [\n  {\n    reply: $json.output,\n    message: $node[\"Normalize Email Data\"].json.message.trim(),\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject, \n    translated_text: $node[\"Structure translated Data\"].json.translated_text,\n    language: $node[\"Structure translated Data\"].json.language\n    \n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3040,
+          224
+        ],
+        "id": "c26af0ec-9010-44b9-95af-fbe3acb4adf2",
+        "name": "Structure reply data"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Translate this into {{$json.language}}:\n\n{{$json.reply}}",
+          "options": {
+            "systemMessage": "You are a translation system.\n\nYour task:\n- Translate the given English text into the target language.\n\nRules:\n- Output ONLY translated text\n- Do NOT include explanation\n- Do NOT include extra text"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          3248,
+          224
+        ],
+        "id": "2fc54d51-e91a-4a7b-89fd-5b3db706996e",
+        "name": "Translate reply to user language"
+      },
+      {
+        "parameters": {
+          "jsCode": "return [\n  {\n    reply: $json.output, // translated reply\n    message: $node[\"Normalize Email Data\"].json.message.trim(),\n    email: $node[\"Normalize Email Data\"].json.email,\n    subject: $node[\"Normalize Email Data\"].json.subject,\n    category: $node[\"Parse Classification output\"].json.category,\n    language: $node[\"Structure translated Data\"].json.language\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3568,
+          240
+        ],
+        "id": "d0b44c83-18eb-4ace-94a6-613272d71a1c",
+        "name": "Final Email Formator"
+      },
+      {
+        "parameters": {
+          "sendTo": "={{$json.email}}",
+          "subject": "=Re: {{$json.subject}}",
+          "emailType": "text",
+          "message": "={{$json.reply}}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          3760,
+          208
+        ],
+        "id": "e642eaee-c5a1-41b4-9378-185bac1d8ab4",
+        "name": "Send Reply to User",
+        "webhookId": "43d1fa38-4c0a-47d6-8d91-74770dc4b146",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "📩 Gmail Input Setup\n\nThis workflow listens to incoming emails.\n\nSteps:\n1. Connect your Gmail account\n2. Enable read access (Inbox)\n3. Set polling (Every 1 min recommended)\n\nTest:\nSend an email like:\n\"I want a refund\"",
+          "color": 5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -64,
+          -384
+        ],
+        "typeVersion": 1,
+        "id": "e8e2f9aa-c353-43aa-9e32-39eeabb7890f",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "content": "🤖 AI Model Setup\n\nThis workflow uses AI agents.\n\nRequired:\n- OpenAI API Key (or compatible LLM)\n\nSteps:\n1. Open each AI Agent node\n2. Select your model\n3. Add API credentials\n\nAgents Used:\n- Language Detection\n- Translation\n- Classification\n- Reply Generator",
+          "color": 5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          416,
+          -320
+        ],
+        "typeVersion": 1,
+        "id": "f1940557-80e4-4813-acdf-7924f12da423",
+        "name": "Sticky Note1"
+      },
+      {
+        "parameters": {
+          "content": "🌐 Language Processing\n\nFlow:\n1. Detect language\n2. Translate to English\n3. Process request\n4. Translate reply back\n\nSupported:\n- Hindi\n- Telugu\n- English\n- Other major languages\n\nNote:\nSingle language per email works best",
+          "color": 5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1248,
+          -336
+        ],
+        "typeVersion": 1,
+        "id": "25f75cf4-57c9-4faa-8a8a-8e5e551e6bd8",
+        "name": "Sticky Note2"
+      },
+      {
+        "parameters": {
+          "content": "🚦 Decision Logic\n\nAuto Reply:\n- Confidence ≥ 0.6\n- Urgency ≠ High\n\nEscalation:\n- Urgency = High\nOR\n- Confidence < 0.6\n\nOutput:\n- Reply to user OR\n- Send alert to admin",
+          "color": 5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1792,
+          -176
+        ],
+        "typeVersion": 1,
+        "id": "0edf2ab4-58eb-4a48-b023-3bc81f79654e",
+        "name": "Sticky Note3"
+      },
+      {
+        "parameters": {
+          "content": "📤 Email Output\n\nAuto Reply:\n- Sent to user email\n- Same language as input\n\nEscalation:\n- Sent to admin\n- Includes full details\n\nMake sure:\nGmail send node is configured",
+          "color": 5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2944,
+          -224
+        ],
+        "typeVersion": 1,
+        "id": "968f7fc9-ae5d-40c9-8158-f2cdcaeae283",
+        "name": "Sticky Note4"
+      },
+      {
+        "parameters": {
+          "content": "🧪 Testing\n\nTry these inputs:\n\nEnglish:\n\"I want a refund\"\n\nHindi:\n\"मुझे मेरा पैसा वापस चाहिए\"\n\nTelugu:\n\"నాకు నా డబ్బు తిరిగి కావాలి\"\n\nExpected:\n- Correct classification\n- Proper reply\n- Language preserved",
+          "color": 5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -112,
+          384
+        ],
+        "typeVersion": 1,
+        "id": "3455b712-42a0-4080-8a91-aae37fbe8075",
+        "name": "Sticky Note5"
+      }
+    ],
+    "connections": {
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Language Detection Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Translate to English",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model2": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Classification Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model3": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Generate Reply",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model4": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Translate reply to user language",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gmail Input Trigger": {
+        "main": [
+          [
+            {
+              "node": "Normalize Email Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize Email Data": {
+        "main": [
+          [
+            {
+              "node": "Language Detection Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Language Detection Agent": {
+        "main": [
+          [
+            {
+              "node": "Parse Language+Confidence",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Language+Confidence": {
+        "main": [
+          [
+            {
+              "node": "Language Confidence check",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Language Confidence check": {
+        "main": [
+          [
+            {
+              "node": "Fall back to English",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Translate to English",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fall back to English": {
+        "main": [
+          []
+        ]
+      },
+      "Translate to English": {
+        "main": [
+          [
+            {
+              "node": "Structure translated Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structure translated Data": {
+        "main": [
+          [
+            {
+              "node": "Classification Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Classification Agent": {
+        "main": [
+          [
+            {
+              "node": "Parse Classification output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Classification output": {
+        "main": [
+          [
+            {
+              "node": "Decision: Auto Reply vs Escalate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Decision: Auto Reply vs Escalate": {
+        "main": [
+          [
+            {
+              "node": "Restore Full Context (Escalation)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Restore Full Context(Reply)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Restore Full Context (Escalation)": {
+        "main": [
+          [
+            {
+              "node": "Add Escalation Meta Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Add Escalation Meta Data": {
+        "main": [
+          [
+            {
+              "node": "Send Escalation Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Restore Full Context(Reply)": {
+        "main": [
+          [
+            {
+              "node": "Generate Reply",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Reply": {
+        "main": [
+          [
+            {
+              "node": "Structure reply data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structure reply data": {
+        "main": [
+          [
+            {
+              "node": "Translate reply to user language",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Translate reply to user language": {
+        "main": [
+          [
+            {
+              "node": "Final Email Formator",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Final Email Formator": {
+        "main": [
+          [
+            {
+              "node": "Send Reply to User",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Chandu M",
+    "name": "v1.0.0 – Multilingual AI Support Bot (Initial Release)",
+    "description": "",
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-14T13:45:19.782Z",
+        "id": 14,
+        "workflowId": "3lA7apPDi9yHf1SX",
+        "versionId": "465fec38-b62f-4e64-ba00-cdafb853f6d5",
+        "event": "activated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    ]
+  },
+  "scopes": [
+    "execution:reveal",
+    "workflow:create",
+    "workflow:delete",
+    "workflow:disableRedaction",
+    "workflow:enableRedaction",
+    "workflow:execute",
+    "workflow:execute-chat",
+    "workflow:export",
+    "workflow:list",
+    "workflow:move",
+    "workflow:publish",
+    "workflow:read",
+    "workflow:share",
+    "workflow:unpublish",
+    "workflow:unshare",
+    "workflow:update"
+  ],
+  "checksum": "998e2d680c07d3dfb7a4ccfda898ed350793cf18ee3956a2f98c355396035b2a"
+}
