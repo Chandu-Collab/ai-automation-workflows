@@ -28,7 +28,7 @@
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
-          "id": "ElpSuTJcjmLFzmqr",
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
           "name": "OpenAI account"
         }
       }
@@ -54,7 +54,7 @@
       "name": "OpenAI Chat Model1",
       "credentials": {
         "openAiApi": {
-          "id": "ElpSuTJcjmLFzmqr",
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
           "name": "OpenAI account"
         }
       }
@@ -80,7 +80,7 @@
       "name": "OpenAI Chat Model2",
       "credentials": {
         "openAiApi": {
-          "id": "ElpSuTJcjmLFzmqr",
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
           "name": "OpenAI account"
         }
       }
@@ -106,7 +106,7 @@
       "name": "OpenAI Chat Model3",
       "credentials": {
         "openAiApi": {
-          "id": "ElpSuTJcjmLFzmqr",
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
           "name": "OpenAI account"
         }
       }
@@ -132,7 +132,7 @@
       "name": "OpenAI Chat Model4",
       "credentials": {
         "openAiApi": {
-          "id": "ElpSuTJcjmLFzmqr",
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
           "name": "OpenAI account"
         }
       }
@@ -149,7 +149,7 @@
         "simple": false,
         "maxResults": 1,
         "filters": {
-          "sender": "chandouqiande@gmail.com"
+          "sender": "your_email@gmail.com"
         },
         "options": {}
       },
@@ -163,7 +163,7 @@
       "name": "Gmail Input Trigger",
       "credentials": {
         "gmailOAuth2": {
-          "id": "dJo19xe1bVod4Y6k",
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
           "name": "Gmail account"
         }
       }
@@ -460,7 +460,7 @@
       "webhookId": "8fea43e2-0ec8-46bd-b415-4c0666b86edb",
       "credentials": {
         "gmailOAuth2": {
-          "id": "dJo19xe1bVod4Y6k",
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
           "name": "Gmail account"
         }
       }
@@ -557,7 +557,7 @@
       "webhookId": "43d1fa38-4c0a-47d6-8d91-74770dc4b146",
       "credentials": {
         "gmailOAuth2": {
-          "id": "dJo19xe1bVod4Y6k",
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
           "name": "Gmail account"
         }
       }
@@ -1024,7 +1024,7 @@
         "updatedAt": "2026-06-04T07:55:05.260Z",
         "createdAt": "2026-06-04T07:52:41.897Z",
         "id": "loWf0mBs1xKuh5N3",
-        "name": "Chandu M <chandouqiande@gmail.com>",
+        "name": "Chandu M <your_email@gmail.com>",
         "type": "personal",
         "icon": null,
         "description": null,
@@ -1092,7 +1092,7 @@
         "name": "OpenAI Chat Model",
         "credentials": {
           "openAiApi": {
-            "id": "ElpSuTJcjmLFzmqr",
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
             "name": "OpenAI account"
           }
         }
@@ -1118,7 +1118,7 @@
         "name": "OpenAI Chat Model1",
         "credentials": {
           "openAiApi": {
-            "id": "ElpSuTJcjmLFzmqr",
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
             "name": "OpenAI account"
           }
         }
@@ -1144,7 +1144,7 @@
         "name": "OpenAI Chat Model2",
         "credentials": {
           "openAiApi": {
-            "id": "ElpSuTJcjmLFzmqr",
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
             "name": "OpenAI account"
           }
         }
@@ -1170,7 +1170,7 @@
         "name": "OpenAI Chat Model3",
         "credentials": {
           "openAiApi": {
-            "id": "ElpSuTJcjmLFzmqr",
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
             "name": "OpenAI account"
           }
         }
@@ -1196,7 +1196,7 @@
         "name": "OpenAI Chat Model4",
         "credentials": {
           "openAiApi": {
-            "id": "ElpSuTJcjmLFzmqr",
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
             "name": "OpenAI account"
           }
         }
@@ -1213,7 +1213,7 @@
           "simple": false,
           "maxResults": 1,
           "filters": {
-            "sender": "chandouqiande@gmail.com"
+            "sender": "your_email@gmail.com"
           },
           "options": {}
         },
@@ -1227,7 +1227,7 @@
         "name": "Gmail Input Trigger",
         "credentials": {
           "gmailOAuth2": {
-            "id": "dJo19xe1bVod4Y6k",
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
             "name": "Gmail account"
           }
         }
@@ -1524,7 +1524,7 @@
         "webhookId": "8fea43e2-0ec8-46bd-b415-4c0666b86edb",
         "credentials": {
           "gmailOAuth2": {
-            "id": "dJo19xe1bVod4Y6k",
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
             "name": "Gmail account"
           }
         }
@@ -1621,7 +1621,7 @@
         "webhookId": "43d1fa38-4c0a-47d6-8d91-74770dc4b146",
         "credentials": {
           "gmailOAuth2": {
-            "id": "dJo19xe1bVod4Y6k",
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
             "name": "Gmail account"
           }
         }
