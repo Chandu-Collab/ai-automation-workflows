@@ -1,0 +1,1057 @@
+{
+  "updatedAt": "2026-06-16T17:34:07.891Z",
+  "createdAt": "2026-06-16T08:07:40.240Z",
+  "id": "uU4eBQcEns2iDXRt",
+  "name": "AI Business Insights & Alert System (Google Sheets → Gmail)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-oss-20b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        224
+      ],
+      "id": "9ff5ca8c-5362-4016-bc10-e9430bd0ca17",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "Monthly Revenue Report",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_DOCUMENT_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_DOCUMENT_ID/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -144,
+        16
+      ],
+      "id": "bee9f1e6-982f-4a03-9097-17c7511aecd8",
+      "name": "Fetch Business Data(Google Sheets)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all input rows\nconst rows = $input.all().map(item => item.json);\n\n// Sort by date (old → new)\nrows.sort((a, b) => {\n  const d1 = new Date(a.Date.split(\"/\").reverse().join(\"-\"));\n  const d2 = new Date(b.Date.split(\"/\").reverse().join(\"-\"));\n  return d1 - d2;\n});\n\n// Create formatted string for AI\nlet formatted = \"\";\n\nrows.forEach(r => {\n  formatted += `Date: ${r.Date} | Sales: ${r.Sales} | Leads: ${r.Leads} | Revenue: ${r.Revenue}\\n`;\n});\n\n// Return SINGLE item (very important)\nreturn [\n  {\n    json: {\n      formatted_data: formatted,\n      raw: rows\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        16
+      ],
+      "id": "3fdad262-ccba-4ab5-a8ea-d026b059a44f",
+      "name": "Format & Prepare Data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a concise daily business report based on the data below.\n\nFocus on:\n- What changed\n- Why it changed\n- What actions should be taken\n\nData:\n{{ $json.formatted_data }}",
+        "options": {
+          "systemMessage": "You are an expert business analyst and growth advisor.\n\nGenerate a concise daily business report for decision-makers.\n\nStructure:\n\n1. Key Insights (2–3 bullets)\n2. What Changed (based only on data)\n3. Growth Actions (clear, practical steps)\n4. Risk Alerts (only if critical)\n\nRules:\n- Keep it short and email-friendly\n- Do NOT use tables\n- Do NOT speculate beyond data\n- Ensure all numerical comparisons are accurate\n- Do not make incorrect percentage calculations\n- Only include insights supported by the data\n- Use bullet points for clarity\n- Always use ₹ for currency and no other symbols\n\nTone:\n- Direct\n- Clear\n- Action-oriented"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        272,
+        16
+      ],
+      "id": "a7c7d780-659e-4f32-bb2d-808656ad618f",
+      "name": "Generate Business Insights (AI)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0a5c5bfb-7e6d-41e3-b5d1-3b053129838a",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "ad050200-9af7-4237-a1db-62aacdc5db44",
+              "name": "raw",
+              "value": "={{ $('Format & Prepare Data').item.json.raw }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        16
+      ],
+      "id": "cfbef35e-9594-490c-a30c-2c9b77303ccb",
+      "name": "Prepare Output(Merge AI + Raw Data)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f02a8e75-58a3-48a9-b3ec-b0b307732d21",
+              "leftValue": "={{ $json.raw[2].Revenue / $json.raw[1].Revenue }}",
+              "rightValue": "=0.7",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        752,
+        32
+      ],
+      "id": "e042912f-f05c-432b-92c6-2b4fb1174956",
+      "name": "Check Revenue Drop(>30%)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "308ddf2c-5395-4c71-b626-a83b36a945b3",
+              "leftValue": "={{ $json.raw[2].Leads }}",
+              "rightValue": 30,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        160
+      ],
+      "id": "fb848b50-6fd8-46fe-8261-f2c0ccb1b0cc",
+      "name": "Check Low Leads (<30)"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@DOMAIN.COM",
+        "subject": "=⚠️ Revenue dropped from ₹{{ $json.raw[1].Revenue }} to ₹{{ $json.raw[2].Revenue }}",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -64
+      ],
+      "id": "809aa5c8-700d-445a-94a3-ec75d567f388",
+      "name": "Send Revenue Alert Email",
+      "webhookId": "61bec1a6-b229-42fe-9c5b-2badf165abf9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@DOMAIN.COM",
+        "subject": "=⚠️ Low Leads: {{ $json.raw[2].Leads }} today",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1184,
+        64
+      ],
+      "id": "6a1a80e6-266c-4f9e-9b94-d0882eecc27f",
+      "name": "Send Leads Alert Message",
+      "webhookId": "1ee0007f-9f70-4d14-9e1f-267a99310be9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@DOMAIN.COM",
+        "subject": "📊 Daily Business Report",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1184,
+        256
+      ],
+      "id": "30cee15d-be36-46db-8c78-e7b704b157fb",
+      "name": "Send Normal Report Email",
+      "webhookId": "72f79bfa-17ae-49b5-8759-04ad85f0db8e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📊 Google Sheets Setup\n\n• Create sheet with columns:\n  Date, Sales, Leads, Revenue\n\n• Ensure:\n  - No empty rows\n  - Numeric values only\n\n• Update data daily"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "a3acdb17-ab42-4833-8d04-a681c6414151",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "🧠 AI Model Setup\n\n• Connect OpenAI API\n• Used for:\n  - Insights\n  - Trends\n  - Suggestions\n\n• Output drives email reports"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        240,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "b51a3995-9857-4fab-94eb-969ce363c993",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "⚙️ Data Processing\n\n• Combines rows into one input\n• Prepares structured data\n• Maintains raw + formatted data\n\n• Required for AI accuracy"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        592,
+        288
+      ],
+      "typeVersion": 1,
+      "id": "09476cd5-7167-4d06-b822-93bce0931493",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "⚡ Decision Logic\n\n• Revenue Drop:\n  > 30% decline\n\n• Low Leads:\n  < 30 leads\n\n• Priority:\n  Revenue > Leads > Normal"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "93ec2273-bddf-4450-91b5-6f6750ba69e8",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "📩 Email Alerts\n\n• Revenue Alert → Critical issue\n• Leads Alert → Pipeline issue\n• Normal Report → Daily update\n\n• Sent via Gmail"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1072,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "244ac6e2-794e-4167-bff2-0b976018ceac",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "⏱️ Automation\n\n• Replace Manual Trigger\n  with Cron Node\n\n• Run daily (e.g. 9 AM)\n\n• Fully automated reporting"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        320
+      ],
+      "typeVersion": 1,
+      "id": "4df38151-5625-4e8c-9689-22f90c1aae4d",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -352,
+        16
+      ],
+      "id": "d432d960-de3d-4448-93d1-dc3db5da629e",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Business Insights (AI)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Business Data(Google Sheets)": {
+      "main": [
+        [
+          {
+            "node": "Format & Prepare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format & Prepare Data": {
+      "main": [
+        [
+          {
+            "node": "Generate Business Insights (AI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Business Insights (AI)": {
+      "main": [
+        [
+          {
+            "node": "Prepare Output(Merge AI + Raw Data)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Output(Merge AI + Raw Data)": {
+      "main": [
+        [
+          {
+            "node": "Check Revenue Drop(>30%)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Revenue Drop(>30%)": {
+      "main": [
+        [
+          {
+            "node": "Send Revenue Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check Low Leads (<30)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Low Leads (<30)": {
+      "main": [
+        [
+          {
+            "node": "Send Leads Alert Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Normal Report Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Business Data(Google Sheets)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedPerExecution": 15
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "1211a13f-3556-451d-8ba6-6d6e2b05c9cb",
+  "activeVersionId": "1211a13f-3556-451d-8ba6-6d6e2b05c9cb",
+  "versionCounter": 115,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-06-16T08:07:40.248Z",
+      "createdAt": "2026-06-16T08:07:40.248Z",
+      "role": "workflow:owner",
+      "workflowId": "uU4eBQcEns2iDXRt",
+      "projectId": "loWf0mBs1xKuh5N3",
+      "project": {
+        "updatedAt": "2026-06-04T07:55:05.260Z",
+        "createdAt": "2026-06-04T07:52:41.897Z",
+        "id": "loWf0mBs1xKuh5N3",
+        "name": "YOUR_NAME <YOUR_EMAIL@DOMAIN.COM>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2026-06-09T06:33:27.317Z",
+      "createdAt": "2026-06-09T06:33:27.317Z",
+      "id": "8ZUaEfWmhomQ0P8p",
+      "name": "n8n"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:49.072Z",
+      "createdAt": "2026-06-09T06:33:49.072Z",
+      "id": "FnmrzqRNVEcarKLc",
+      "name": "workflow"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:15.749Z",
+      "createdAt": "2026-06-09T06:33:15.749Z",
+      "id": "OqenQjr9s45g7AEO",
+      "name": "ai"
+    },
+    {
+      "updatedAt": "2026-06-16T10:09:49.211Z",
+      "createdAt": "2026-06-16T10:09:49.211Z",
+      "id": "YrvcddHiIT1QrLgV",
+      "name": "alerts"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:22.379Z",
+      "createdAt": "2026-06-09T06:33:22.379Z",
+      "id": "aM91rNGq256NAUAN",
+      "name": "automation"
+    }
+  ],
+  "parentFolder": null,
+  "activeVersion": {
+    "updatedAt": "2026-06-16T17:33:22.000Z",
+    "createdAt": "2026-06-16T17:31:00.831Z",
+    "versionId": "1211a13f-3556-451d-8ba6-6d6e2b05c9cb",
+    "workflowId": "uU4eBQcEns2iDXRt",
+    "nodes": [
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openai/gpt-oss-20b",
+            "mode": "list",
+            "cachedResultName": "openai/gpt-oss-20b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          144,
+          224
+        ],
+        "id": "9ff5ca8c-5362-4016-bc10-e9430bd0ca17",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "ElpSuTJcjmLFzmqr",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1Tjp45Ccd5sR9V59dQ4XzQBPrPYSUko13cj-MVnNr4kE",
+            "mode": "list",
+            "cachedResultName": "Monthly Revenue Report",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Tjp45Ccd5sR9V59dQ4XzQBPrPYSUko13cj-MVnNr4kE/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Tjp45Ccd5sR9V59dQ4XzQBPrPYSUko13cj-MVnNr4kE/edit#gid=0"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          -144,
+          16
+        ],
+        "id": "bee9f1e6-982f-4a03-9097-17c7511aecd8",
+        "name": "Fetch Business Data(Google Sheets)",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "XUo0YZXw282TEr36",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Get all input rows\nconst rows = $input.all().map(item => item.json);\n\n// Sort by date (old → new)\nrows.sort((a, b) => {\n  const d1 = new Date(a.Date.split(\"/\").reverse().join(\"-\"));\n  const d2 = new Date(b.Date.split(\"/\").reverse().join(\"-\"));\n  return d1 - d2;\n});\n\n// Create formatted string for AI\nlet formatted = \"\";\n\nrows.forEach(r => {\n  formatted += `Date: ${r.Date} | Sales: ${r.Sales} | Leads: ${r.Leads} | Revenue: ${r.Revenue}\\n`;\n});\n\n// Return SINGLE item (very important)\nreturn [\n  {\n    json: {\n      formatted_data: formatted,\n      raw: rows\n    }\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          64,
+          16
+        ],
+        "id": "3fdad262-ccba-4ab5-a8ea-d026b059a44f",
+        "name": "Format & Prepare Data"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Generate a concise daily business report based on the data below.\n\nFocus on:\n- What changed\n- Why it changed\n- What actions should be taken\n\nData:\n{{ $json.formatted_data }}",
+          "options": {
+            "systemMessage": "You are an expert business analyst and growth advisor.\n\nGenerate a concise daily business report for decision-makers.\n\nStructure:\n\n1. Key Insights (2–3 bullets)\n2. What Changed (based only on data)\n3. Growth Actions (clear, practical steps)\n4. Risk Alerts (only if critical)\n\nRules:\n- Keep it short and email-friendly\n- Do NOT use tables\n- Do NOT speculate beyond data\n- Ensure all numerical comparisons are accurate\n- Do not make incorrect percentage calculations\n- Only include insights supported by the data\n- Use bullet points for clarity\n- Always use ₹ for currency and no other symbols\n\nTone:\n- Direct\n- Clear\n- Action-oriented"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          272,
+          16
+        ],
+        "id": "a7c7d780-659e-4f32-bb2d-808656ad618f",
+        "name": "Generate Business Insights (AI)"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "0a5c5bfb-7e6d-41e3-b5d1-3b053129838a",
+                "name": "output",
+                "value": "={{ $json.output }}",
+                "type": "string"
+              },
+              {
+                "id": "ad050200-9af7-4237-a1db-62aacdc5db44",
+                "name": "raw",
+                "value": "={{ $('Format & Prepare Data').item.json.raw }}",
+                "type": "array"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          560,
+          16
+        ],
+        "id": "cfbef35e-9594-490c-a30c-2c9b77303ccb",
+        "name": "Prepare Output(Merge AI + Raw Data)"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "f02a8e75-58a3-48a9-b3ec-b0b307732d21",
+                "leftValue": "={{ $json.raw[2].Revenue / $json.raw[1].Revenue }}",
+                "rightValue": "=0.7",
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          752,
+          32
+        ],
+        "id": "e042912f-f05c-432b-92c6-2b4fb1174956",
+        "name": "Check Revenue Drop(>30%)"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "308ddf2c-5395-4c71-b626-a83b36a945b3",
+                "leftValue": "={{ $json.raw[2].Leads }}",
+                "rightValue": 30,
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          976,
+          160
+        ],
+        "id": "fb848b50-6fd8-46fe-8261-f2c0ccb1b0cc",
+        "name": "Check Low Leads (<30)"
+      },
+      {
+        "parameters": {
+          "sendTo": "YOUR_EMAIL@DOMAIN.COM",
+          "subject": "=⚠️ Revenue dropped from ₹{{ $json.raw[1].Revenue }} to ₹{{ $json.raw[2].Revenue }}",
+          "emailType": "text",
+          "message": "={{ $json.output }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          960,
+          -64
+        ],
+        "id": "809aa5c8-700d-445a-94a3-ec75d567f388",
+        "name": "Send Revenue Alert Email",
+        "webhookId": "61bec1a6-b229-42fe-9c5b-2badf165abf9",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "dJo19xe1bVod4Y6k",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "YOUR_EMAIL@DOMAIN.COM",
+          "subject": "=⚠️ Low Leads: {{ $json.raw[2].Leads }} today",
+          "emailType": "text",
+          "message": "={{ $json.output }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          1184,
+          64
+        ],
+        "id": "6a1a80e6-266c-4f9e-9b94-d0882eecc27f",
+        "name": "Send Leads Alert Message",
+        "webhookId": "1ee0007f-9f70-4d14-9e1f-267a99310be9",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "dJo19xe1bVod4Y6k",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "YOUR_EMAIL@DOMAIN.COM",
+          "subject": "📊 Daily Business Report",
+          "emailType": "text",
+          "message": "={{ $json.output }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          1184,
+          256
+        ],
+        "id": "30cee15d-be36-46db-8c78-e7b704b157fb",
+        "name": "Send Normal Report Email",
+        "webhookId": "72f79bfa-17ae-49b5-8759-04ad85f0db8e",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "dJo19xe1bVod4Y6k",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "📊 Google Sheets Setup\n\n• Create sheet with columns:\n  Date, Sales, Leads, Revenue\n\n• Ensure:\n  - No empty rows\n  - Numeric values only\n\n• Update data daily"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -400,
+          -224
+        ],
+        "typeVersion": 1,
+        "id": "a3acdb17-ab42-4833-8d04-a681c6414151",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "content": "🧠 AI Model Setup\n\n• Connect OpenAI API\n• Used for:\n  - Insights\n  - Trends\n  - Suggestions\n\n• Output drives email reports"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          240,
+          -208
+        ],
+        "typeVersion": 1,
+        "id": "b51a3995-9857-4fab-94eb-969ce363c993",
+        "name": "Sticky Note1"
+      },
+      {
+        "parameters": {
+          "content": "⚙️ Data Processing\n\n• Combines rows into one input\n• Prepares structured data\n• Maintains raw + formatted data\n\n• Required for AI accuracy"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          592,
+          288
+        ],
+        "typeVersion": 1,
+        "id": "09476cd5-7167-4d06-b822-93bce0931493",
+        "name": "Sticky Note2"
+      },
+      {
+        "parameters": {
+          "content": "⚡ Decision Logic\n\n• Revenue Drop:\n  > 30% decline\n\n• Low Leads:\n  < 30 leads\n\n• Priority:\n  Revenue > Leads > Normal"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          672,
+          -240
+        ],
+        "typeVersion": 1,
+        "id": "93ec2273-bddf-4450-91b5-6f6750ba69e8",
+        "name": "Sticky Note3"
+      },
+      {
+        "parameters": {
+          "content": "📩 Email Alerts\n\n• Revenue Alert → Critical issue\n• Leads Alert → Pipeline issue\n• Normal Report → Daily update\n\n• Sent via Gmail"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1072,
+          -256
+        ],
+        "typeVersion": 1,
+        "id": "244ac6e2-794e-4167-bff2-0b976018ceac",
+        "name": "Sticky Note4"
+      },
+      {
+        "parameters": {
+          "content": "⏱️ Automation\n\n• Replace Manual Trigger\n  with Cron Node\n\n• Run daily (e.g. 9 AM)\n\n• Fully automated reporting"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -432,
+          320
+        ],
+        "typeVersion": 1,
+        "id": "4df38151-5625-4e8c-9689-22f90c1aae4d",
+        "name": "Sticky Note5"
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {}
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -352,
+          16
+        ],
+        "id": "d432d960-de3d-4448-93d1-dc3db5da629e",
+        "name": "Schedule Trigger"
+      }
+    ],
+    "connections": {
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Generate Business Insights (AI)",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Business Data(Google Sheets)": {
+        "main": [
+          [
+            {
+              "node": "Format & Prepare Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format & Prepare Data": {
+        "main": [
+          [
+            {
+              "node": "Generate Business Insights (AI)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Business Insights (AI)": {
+        "main": [
+          [
+            {
+              "node": "Prepare Output(Merge AI + Raw Data)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Output(Merge AI + Raw Data)": {
+        "main": [
+          [
+            {
+              "node": "Check Revenue Drop(>30%)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Revenue Drop(>30%)": {
+        "main": [
+          [
+            {
+              "node": "Send Revenue Alert Email",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Check Low Leads (<30)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Low Leads (<30)": {
+        "main": [
+          [
+            {
+              "node": "Send Leads Alert Message",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send Normal Report Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Fetch Business Data(Google Sheets)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "YOUR_NAME",
+    "name": "AI Business Insights & Alert System (Google Sheets → Gmail)",
+    "description": "This workflow is an AI-powered business monitoring and alert system built using n8n.\n\nIt automatically fetches daily business data from Google Sheets, analyzes it using an AI agent, and sends actionable insights via email.\n\nKey Features:\n- AI-generated business insights and trends\n- Revenue drop detection using percentage-based logic\n- Low lead detection for early pipeline issues\n- Smart alert system with priority-based decision flow\n- Automated email reports via Gmail\n\nHow it works:\n1. Fetches daily data (Sales, Leads, Revenue) from Google Sheets\n2. Formats and processes data for analysis\n3. Uses AI to generate insights, trends, and recommendations\n4. Detects anomalies (revenue drops, low leads)\n5. Sends alerts or daily reports via Gmail\n\nUse Cases:\n- Small business performance monitoring\n- Startup growth tracking\n- Sales and marketing analytics\n- Daily automated reporting without dashboards\n\nThis workflow helps businesses move from passive reporting to proactive decision-making.",
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-16T17:33:22.513Z",
+        "id": 17,
+        "workflowId": "uU4eBQcEns2iDXRt",
+        "versionId": "1211a13f-3556-451d-8ba6-6d6e2b05c9cb",
+        "event": "activated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      },
+      {
+        "createdAt": "2026-06-16T17:33:49.827Z",
+        "id": 19,
+        "workflowId": "uU4eBQcEns2iDXRt",
+        "versionId": "1211a13f-3556-451d-8ba6-6d6e2b05c9cb",
+        "event": "activated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      },
+      {
+        "createdAt": "2026-06-16T17:33:49.775Z",
+        "id": 18,
+        "workflowId": "uU4eBQcEns2iDXRt",
+        "versionId": "1211a13f-3556-451d-8ba6-6d6e2b05c9cb",
+        "event": "deactivated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    ]
+  },
+  "scopes": [
+    "execution:reveal",
+    "workflow:create",
+    "workflow:delete",
+    "workflow:disableRedaction",
+    "workflow:enableRedaction",
+    "workflow:execute",
+    "workflow:execute-chat",
+    "workflow:export",
+    "workflow:list",
+    "workflow:move",
+    "workflow:publish",
+    "workflow:read",
+    "workflow:share",
+    "workflow:unpublish",
+    "workflow:unshare",
+    "workflow:update"
+  ],
+  "checksum": "fc9da918342374f0c47d20415d7c339915a58eede3a5b30f72c6f6e0ebf16633"
+}
