@@ -19,6 +19,21 @@
 
 ## 🔥 Workflows
 
+### 💬 AI Instagram DM → Lead Capture & Qualification System (NEW 🔥)
+
+Automatically captures Instagram direct messages, analyzes user intent using AI, and classifies leads into hot, warm, or cold categories.
+
+✨ **Features:**
+- 🤖 AI-powered intent detection
+- 🔥 Automatic lead scoring (hot/warm/cold)
+- 📊 Google Sheets CRM integration
+- 📧 Instant email alerts for high-priority leads
+- 🚀 Scalable and customizable workflow
+
+📁 **Folder:** [AI Instagram DM → Lead Capture & Qualification System (n8n)](./workflows/AI%20Instagram%20DM%20%E2%86%92%20Lead%20Capture%20&%20Qualification%20System%20%28n8n%29/)
+
+---
+
 ### 🌍 Multilingual AI Customer Support Bot (NEW 🔥)
 
 Automates customer support using AI agents with multilingual capabilities.
@@ -104,6 +119,7 @@ Fetches daily business data from Google Sheets, analyzes it using an AI agent, a
 
 ```bash
 ai-automation-workflows/
+├── workflows/AI Instagram DM → Lead Capture & Qualification System (n8n)/
 ├── workflows/Multilingual AI Customer Support Automation/
 ├── workflows/job-matching-agent/
 ├── workflows/lead-capture-agent/

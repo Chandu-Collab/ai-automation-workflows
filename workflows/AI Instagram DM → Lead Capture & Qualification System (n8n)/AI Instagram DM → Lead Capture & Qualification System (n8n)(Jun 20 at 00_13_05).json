@@ -1,0 +1,1219 @@
+{
+  "updatedAt": "2026-06-19T18:48:28.185Z",
+  "createdAt": "2026-06-19T17:00:20.294Z",
+  "id": "GHVO4CazGR49CQKS",
+  "name": "AI Instagram DM → Lead Capture & Qualification System (n8n)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "instagram-lead",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2127bf5d-726a-46e7-ae28-06a73224def7",
+      "name": "Instagram DM Webhook",
+      "webhookId": "e4a389a3-652f-433f-9c9e-f4b997984813"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d627e753-17e7-4415-a377-c0fa01058e42",
+              "name": "username",
+              "value": "={{ $json.body.username }}",
+              "type": "string"
+            },
+            {
+              "id": "49c7d7c6-cb9e-4fc9-8a6a-20a21258c081",
+              "name": "message",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "058b5af3-36ca-458d-8d62-53f29f42dd58",
+              "name": "created_at",
+              "value": "={{ new Date($json.body.timestamp).toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "d70ca288-8b36-432a-8858-0108f196b2f5",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e9ae34ef-e909-4046-95fa-7b6cc374ab94",
+      "name": "Normalize Lead Data"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-oss-20b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        208
+      ],
+      "id": "241b47dc-39b7-40da-afcb-1ab69e59c0fb",
+      "name": "LLM Engine (OpenAI)",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following Instagram message and classify it:\n\nMessage:\n\"{{$json[\"message\"]}}\"\n",
+        "options": {
+          "systemMessage": "You are an AI lead qualification agent.\n\nYour job is to analyze Instagram direct messages and classify them into structured lead data.\n\nYou MUST always return ONLY valid JSON. Do not include explanations, text, or formatting outside JSON.\n\nOutput format:\n{\n\"intent\": \"buying | enquiry | support | spam\",\n\"lead_score\": \"hot | warm | cold\",\n\"summary\": \"short, clear summary of the message\"\n}\n\nClassification rules:\n\n* HOT: User clearly wants to buy, asks for price, demo, cost, or shows urgency\n* WARM: User shows interest but is not clearly ready to buy\n* COLD: User is vague, casual, or not serious\n* SPAM: Promotions, irrelevant or unrelated messages\n\nAdditional rules:\n\n* Be consistent and deterministic\n* If unsure, default to \"cold\"\n* Keep summary under 15 words\n* Never return invalid JSON\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6797a36c-430b-49a2-a1a5-7698c992a423",
+      "name": "AI Lead Classifier"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        592,
+        -176
+      ],
+      "id": "10164a4d-85c1-41d7-b99d-7e4f48292d6b",
+      "name": "Merge Lead + AI Output"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8efd619a-7da2-4073-8f59-0fdc04a76b99",
+              "name": "intent",
+              "value": "={{JSON.parse($json[\"output\"]).intent}}",
+              "type": "string"
+            },
+            {
+              "id": "a14ab5e4-176f-4be0-96a4-bac779785b40",
+              "name": "lead_score",
+              "value": "={{JSON.parse($json[\"output\"]).lead_score}}",
+              "type": "string"
+            },
+            {
+              "id": "630ad13f-db4c-400c-ae8f-1e512ddce291",
+              "name": "summary",
+              "value": "={{JSON.parse($json[\"output\"]).summary}}",
+              "type": "string"
+            },
+            {
+              "id": "f25c32d3-556d-4f70-b9ba-2f2f7c00df3a",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        0
+      ],
+      "id": "7630462b-4388-42f0-9f5b-2caca6972a0f",
+      "name": "Parse AI Response"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "934003ec-3dc6-497f-8eed-8a5b193f368d",
+              "leftValue": "={{ $json[\"lead_score\"].trim().toLowerCase() }}",
+              "rightValue": "hot",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        0
+      ],
+      "id": "e851d5b1-c212-4cdc-8e78-f8175ff991c6",
+      "name": "Check Hot Lead"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_DOCUMENT_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "Instagram DM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_DOCUMENT_ID_HERE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YOUR_SHEET_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "Sheet4",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_DOCUMENT_ID_HERE/edit#gid=YOUR_SHEET_ID_HERE"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "username": "={{ $json.username }}",
+            "email": "={{ $json.email }}",
+            "message": "={{ $json.message }}",
+            "intent": "={{ $json.intent }}",
+            "lead_score": "={{ $json.lead_score }}",
+            "summary": "={{ $json.summary }}",
+            "created_at": "={{ $json.created_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_score",
+              "displayName": "lead_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        -96
+      ],
+      "id": "fae42370-5971-4aa5-ab7d-3eaf0eec77b5",
+      "name": "Store Hot Lead (Sheets)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=🔥 New HOT Lead from {{$json[\"username\"]}}",
+        "emailType": "text",
+        "message": "=🚀 NEW HOT LEAD ALERT \n👤 Username: {{$json[\"username\"]}}\n💬 Message: {{$json[\"message\"]}} \n🧠 Intent: {{$json[\"intent\"]}}\n🔥 Lead Score: {{$json[\"lead_score\"]}}\n📝 Summary: {{$json[\"summary\"]}}\n⏰ Time: {{$json[\"created_at\"]}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1392,
+        -96
+      ],
+      "id": "d26c3e63-a179-495d-955f-9dd02eada51d",
+      "name": "Send Hot Lead Alert (Gmail)",
+      "webhookId": "ae598de6-95b3-48db-9827-cd2760c65b77",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_DOCUMENT_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "Instagram DM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_DOCUMENT_ID_HERE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "YOUR_SHEET_ID_HERE",
+          "mode": "list",
+          "cachedResultName": "Sheet4",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_DOCUMENT_ID_HERE/edit#gid=YOUR_SHEET_ID_HERE"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "username": "={{ $json.username }}",
+            "email": "={{ $json.email }}",
+            "message": "={{ $json.message }}",
+            "intent": "={{ $json.intent }}",
+            "lead_score": "={{ $json.lead_score }}",
+            "summary": "={{ $json.summary }}",
+            "created_at": "={{ $json.created_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_score",
+              "displayName": "lead_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1200,
+        128
+      ],
+      "id": "9103a46b-45ac-4994-9ab9-13b14688618b",
+      "name": "Store Warm/Cold Lead (Sheets)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Instagram DM Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Lead Data": {
+      "main": [
+        [
+          {
+            "node": "AI Lead Classifier",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Lead + AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Engine (OpenAI)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Lead Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Lead Classifier": {
+      "main": [
+        [
+          {
+            "node": "Merge Lead + AI Output",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Lead + AI Output": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "Check Hot Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Hot Lead": {
+      "main": [
+        [
+          {
+            "node": "Store Hot Lead (Sheets)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store Warm/Cold Lead (Sheets)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Hot Lead (Sheets)": {
+      "main": [
+        [
+          {
+            "node": "Send Hot Lead Alert (Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedPerExecution": 12
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "a0e3390c-661c-4f89-bcc0-1787900b7d74",
+  "activeVersionId": "a0e3390c-661c-4f89-bcc0-1787900b7d74",
+  "versionCounter": 84,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-06-19T17:00:20.298Z",
+      "createdAt": "2026-06-19T17:00:20.298Z",
+      "role": "workflow:owner",
+      "workflowId": "GHVO4CazGR49CQKS",
+      "projectId": "loWf0mBs1xKuh5N3",
+      "project": {
+        "updatedAt": "2026-06-04T07:55:05.260Z",
+        "createdAt": "2026-06-04T07:52:41.897Z",
+        "id": "loWf0mBs1xKuh5N3",
+        "name": "Chandu M <YOUR_EMAIL@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2026-06-09T06:33:27.317Z",
+      "createdAt": "2026-06-09T06:33:27.317Z",
+      "id": "8ZUaEfWmhomQ0P8p",
+      "name": "n8n"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:45.548Z",
+      "createdAt": "2026-06-09T06:33:45.548Z",
+      "id": "SSAFLny1wplVixFm",
+      "name": "ai agent"
+    },
+    {
+      "updatedAt": "2026-06-19T18:47:33.921Z",
+      "createdAt": "2026-06-19T18:47:33.921Z",
+      "id": "adTN6XPgfo01vqx0",
+      "name": "ai automation"
+    }
+  ],
+  "parentFolder": null,
+  "activeVersion": {
+    "updatedAt": "2026-06-19T18:48:07.000Z",
+    "createdAt": "2026-06-19T18:43:05.075Z",
+    "versionId": "a0e3390c-661c-4f89-bcc0-1787900b7d74",
+    "workflowId": "GHVO4CazGR49CQKS",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "instagram-lead",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "2127bf5d-726a-46e7-ae28-06a73224def7",
+        "name": "Instagram DM Webhook",
+        "webhookId": "e4a389a3-652f-433f-9c9e-f4b997984813"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "d627e753-17e7-4415-a377-c0fa01058e42",
+                "name": "username",
+                "value": "={{ $json.body.username }}",
+                "type": "string"
+              },
+              {
+                "id": "49c7d7c6-cb9e-4fc9-8a6a-20a21258c081",
+                "name": "message",
+                "value": "={{ $json.body.message }}",
+                "type": "string"
+              },
+              {
+                "id": "058b5af3-36ca-458d-8d62-53f29f42dd58",
+                "name": "created_at",
+                "value": "={{ new Date($json.body.timestamp).toISOString() }}",
+                "type": "string"
+              },
+              {
+                "id": "d70ca288-8b36-432a-8858-0108f196b2f5",
+                "name": "email",
+                "value": "={{ $json.body.email }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          208,
+          0
+        ],
+        "id": "e9ae34ef-e909-4046-95fa-7b6cc374ab94",
+        "name": "Normalize Lead Data"
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openai/gpt-oss-20b",
+            "mode": "list",
+            "cachedResultName": "openai/gpt-oss-20b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          288,
+          208
+        ],
+        "id": "241b47dc-39b7-40da-afcb-1ab69e59c0fb",
+        "name": "LLM Engine (OpenAI)",
+        "credentials": {
+          "openAiApi": {
+            "id": "YOUR_OPENAI_CREDENTIAL_ID",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Analyze the following Instagram message and classify it:\n\nMessage:\n\"{{$json[\"message\"]}}\"\n",
+          "options": {
+            "systemMessage": "You are an AI lead qualification agent.\n\nYour job is to analyze Instagram direct messages and classify them into structured lead data.\n\nYou MUST always return ONLY valid JSON. Do not include explanations, text, or formatting outside JSON.\n\nOutput format:\n{\n\"intent\": \"buying | enquiry | support | spam\",\n\"lead_score\": \"hot | warm | cold\",\n\"summary\": \"short, clear summary of the message\"\n}\n\nClassification rules:\n\n* HOT: User clearly wants to buy, asks for price, demo, cost, or shows urgency\n* WARM: User shows interest but is not clearly ready to buy\n* COLD: User is vague, casual, or not serious\n* SPAM: Promotions, irrelevant or unrelated messages\n\nAdditional rules:\n\n* Be consistent and deterministic\n* If unsure, default to \"cold\"\n* Keep summary under 15 words\n* Never return invalid JSON\n"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          416,
+          0
+        ],
+        "id": "6797a36c-430b-49a2-a1a5-7698c992a423",
+        "name": "AI Lead Classifier"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          592,
+          -176
+        ],
+        "id": "10164a4d-85c1-41d7-b99d-7e4f48292d6b",
+        "name": "Merge Lead + AI Output"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "8efd619a-7da2-4073-8f59-0fdc04a76b99",
+                "name": "intent",
+                "value": "={{JSON.parse($json[\"output\"]).intent}}",
+                "type": "string"
+              },
+              {
+                "id": "a14ab5e4-176f-4be0-96a4-bac779785b40",
+                "name": "lead_score",
+                "value": "={{JSON.parse($json[\"output\"]).lead_score}}",
+                "type": "string"
+              },
+              {
+                "id": "630ad13f-db4c-400c-ae8f-1e512ddce291",
+                "name": "summary",
+                "value": "={{JSON.parse($json[\"output\"]).summary}}",
+                "type": "string"
+              },
+              {
+                "id": "f25c32d3-556d-4f70-b9ba-2f2f7c00df3a",
+                "name": "email",
+                "value": "={{ $json.email }}",
+                "type": "string"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          768,
+          0
+        ],
+        "id": "7630462b-4388-42f0-9f5b-2caca6972a0f",
+        "name": "Parse AI Response"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "934003ec-3dc6-497f-8eed-8a5b193f368d",
+                "leftValue": "={{ $json[\"lead_score\"].trim().toLowerCase() }}",
+                "rightValue": "hot",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          976,
+          0
+        ],
+        "id": "e851d5b1-c212-4cdc-8e78-f8175ff991c6",
+        "name": "Check Hot Lead"
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1vGuVoGQJ5_59MOzgkigrxZYkUvjzS8gzYVMRG87vBfg",
+            "mode": "list",
+            "cachedResultName": "Instagram DM",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vGuVoGQJ5_59MOzgkigrxZYkUvjzS8gzYVMRG87vBfg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 2073090364,
+            "mode": "list",
+            "cachedResultName": "Sheet4",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vGuVoGQJ5_59MOzgkigrxZYkUvjzS8gzYVMRG87vBfg/edit#gid=2073090364"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "username": "={{ $json.username }}",
+              "email": "={{ $json.email }}",
+              "message": "={{ $json.message }}",
+              "intent": "={{ $json.intent }}",
+              "lead_score": "={{ $json.lead_score }}",
+              "summary": "={{ $json.summary }}",
+              "created_at": "={{ $json.created_at }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "email",
+                "displayName": "email",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "message",
+                "displayName": "message",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "intent",
+                "displayName": "intent",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "lead_score",
+                "displayName": "lead_score",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "summary",
+                "displayName": "summary",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "created_at",
+                "displayName": "created_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          1184,
+          -96
+        ],
+        "id": "fae42370-5971-4aa5-ab7d-3eaf0eec77b5",
+        "name": "Store Hot Lead (Sheets)",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $json.email }}",
+          "subject": "=🔥 New HOT Lead from {{$json[\"username\"]}}",
+          "emailType": "text",
+          "message": "=🚀 NEW HOT LEAD ALERT \n👤 Username: {{$json[\"username\"]}}\n💬 Message: {{$json[\"message\"]}} \n🧠 Intent: {{$json[\"intent\"]}}\n🔥 Lead Score: {{$json[\"lead_score\"]}}\n📝 Summary: {{$json[\"summary\"]}}\n⏰ Time: {{$json[\"created_at\"]}}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          1392,
+          -96
+        ],
+        "id": "d26c3e63-a179-495d-955f-9dd02eada51d",
+        "name": "Send Hot Lead Alert (Gmail)",
+        "webhookId": "ae598de6-95b3-48db-9827-cd2760c65b77",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "YOUR_GMAIL_CREDENTIAL_ID",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1vGuVoGQJ5_59MOzgkigrxZYkUvjzS8gzYVMRG87vBfg",
+            "mode": "list",
+            "cachedResultName": "Instagram DM",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vGuVoGQJ5_59MOzgkigrxZYkUvjzS8gzYVMRG87vBfg/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 2073090364,
+            "mode": "list",
+            "cachedResultName": "Sheet4",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vGuVoGQJ5_59MOzgkigrxZYkUvjzS8gzYVMRG87vBfg/edit#gid=2073090364"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "username": "={{ $json.username }}",
+              "email": "={{ $json.email }}",
+              "message": "={{ $json.message }}",
+              "intent": "={{ $json.intent }}",
+              "lead_score": "={{ $json.lead_score }}",
+              "summary": "={{ $json.summary }}",
+              "created_at": "={{ $json.created_at }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "email",
+                "displayName": "email",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "message",
+                "displayName": "message",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "intent",
+                "displayName": "intent",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "lead_score",
+                "displayName": "lead_score",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "summary",
+                "displayName": "summary",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "created_at",
+                "displayName": "created_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          1200,
+          128
+        ],
+        "id": "9103a46b-45ac-4994-9ab9-13b14688618b",
+        "name": "Store Warm/Cold Lead (Sheets)",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+            "name": "Google Sheets account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Instagram DM Webhook": {
+        "main": [
+          [
+            {
+              "node": "Normalize Lead Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize Lead Data": {
+        "main": [
+          [
+            {
+              "node": "AI Lead Classifier",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Merge Lead + AI Output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "LLM Engine (OpenAI)": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Lead Classifier",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Lead Classifier": {
+        "main": [
+          [
+            {
+              "node": "Merge Lead + AI Output",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge Lead + AI Output": {
+        "main": [
+          [
+            {
+              "node": "Parse AI Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse AI Response": {
+        "main": [
+          [
+            {
+              "node": "Check Hot Lead",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Hot Lead": {
+        "main": [
+          [
+            {
+              "node": "Store Hot Lead (Sheets)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Store Warm/Cold Lead (Sheets)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Store Hot Lead (Sheets)": {
+        "main": [
+          [
+            {
+              "node": "Send Hot Lead Alert (Gmail)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Chandu M",
+    "name": "v1.0 - Core Lead Capture System",
+    "description": "This workflow automatically captures Instagram direct messages, analyzes user intent using AI, and classifies leads into hot, warm, or cold categories.\n\nHot leads are instantly stored in Google Sheets and trigger real-time email alerts, ensuring you never miss a potential customer. Warm and cold leads are also stored for future follow-ups.\n\nBuilt using n8n and OpenAI, this system helps businesses automate lead qualification, streamline customer communication, and improve response time.\n\nKey Features:\n• AI-powered intent detection\n• Automatic lead scoring (hot/warm/cold)\n• Google Sheets CRM integration\n• Instant email alerts for high-priority leads\n• Scalable and customizable workflow\n\nPerfect for agencies, freelancers, and businesses generating leads through Instagram.",
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-19T18:48:07.551Z",
+        "id": 24,
+        "workflowId": "GHVO4CazGR49CQKS",
+        "versionId": "a0e3390c-661c-4f89-bcc0-1787900b7d74",
+        "event": "activated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      },
+      {
+        "createdAt": "2026-06-19T18:48:28.396Z",
+        "id": 26,
+        "workflowId": "GHVO4CazGR49CQKS",
+        "versionId": "a0e3390c-661c-4f89-bcc0-1787900b7d74",
+        "event": "activated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      },
+      {
+        "createdAt": "2026-06-19T18:48:28.332Z",
+        "id": 25,
+        "workflowId": "GHVO4CazGR49CQKS",
+        "versionId": "a0e3390c-661c-4f89-bcc0-1787900b7d74",
+        "event": "deactivated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    ]
+  },
+  "scopes": [
+    "execution:reveal",
+    "workflow:create",
+    "workflow:delete",
+    "workflow:disableRedaction",
+    "workflow:enableRedaction",
+    "workflow:execute",
+    "workflow:execute-chat",
+    "workflow:export",
+    "workflow:list",
+    "workflow:move",
+    "workflow:publish",
+    "workflow:read",
+    "workflow:share",
+    "workflow:unpublish",
+    "workflow:unshare",
+    "workflow:update"
+  ],
+  "checksum": "b6e2c1835cbaf85c7974e124160effba9386ec80c9f82f1423eda4bb492b5054"
+}
