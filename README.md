@@ -94,6 +94,20 @@ Fetches daily business data from Google Sheets, analyzes it using an AI agent, a
 
 ---
 
+### 📦 AI Order Priority & Notification System (NEW 🔥)
+
+Automatically processes incoming orders, assigns priority using an AI agent based on order value and delivery type, and sends timely notifications.
+
+✨ **Features:**
+- 🤖 AI-powered order priority classification (High, Medium, Low)
+- 🛒 Priority assignment based on delivery type and order value
+- 📊 Automatic data logging to Google Sheets
+- 📧 Automated priority-based email alerts via Gmail
+
+📁 **Folder:** [AI Order Priority & Notification System](./workflows/AI%20Order%20Priority%20&%20Notification%20System/)
+
+---
+
 ## ⚙️ Tech Stack
 
 * **n8n** (Workflow Automation)
@@ -125,6 +139,7 @@ ai-automation-workflows/
 ├── workflows/lead-capture-agent/
 ├── workflows/ai-youtube-content-repurposer/
 ├── workflows/ai-business-insights-n8n/
+├── workflows/AI Order Priority & Notification System/
 ```
 
 ---
