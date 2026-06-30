@@ -19,6 +19,35 @@
 
 ## 🔥 Workflows
 
+### 📧 AI Cold Email Personalization Engine (NEW 🔥)
+
+Automates personalized B2B outreach by researching a company's website, analyzing its business using AI, and generating a tailored outreach email.
+
+✨ **Features:**
+- 🌐 Automated company website scraping via Apify
+- 🧠 AI-powered business research and insight extraction
+- ✍️ Personalized cold email generation (subject & body)
+- 📊 Google Sheets logging of business insights
+- 📧 Gmail integration with automatic fallback for missing websites
+
+📁 **Folder:** [AI Cold Email Personalization Engine](./workflows/AI%20Cold%20Email%20Personalization%20Engine/)
+
+---
+
+### 📝 AI Meeting Notes → Action Items Generator (NEW 🔥)
+
+Automatically analyzes meeting transcripts using AI to extract summaries, key decisions, and action items, then logs them and sends a summary email.
+
+✨ **Features:**
+- 🤖 AI-powered meeting transcript analysis
+- 📋 Automatic extraction of tasks, owners, and deadlines
+- 📊 Google Sheets integration for task tracking
+- 📧 Automated meeting summary emails via Gmail
+
+📁 **Folder:** [AI Meeting Notes → Action Items Generator](./workflows/AI%20Meeting%20Notes%20%E2%86%92%20Action%20Items%20Generator/)
+
+---
+
 ### 💬 AI Instagram DM → Lead Capture & Qualification System (NEW 🔥)
 
 Automatically captures Instagram direct messages, analyzes user intent using AI, and classifies leads into hot, warm, or cold categories.
@@ -112,6 +141,7 @@ Automatically processes incoming orders, assigns priority using an AI agent base
 
 * **n8n** (Workflow Automation)
 * **OpenAI** (AI capabilities)
+* **Apify** (Web Scraping)
 * **Gmail** (Notifications)
 * **Google Sheets** (Data Management)
 * **Remotive API** (Job Board Integration)
@@ -133,6 +163,8 @@ Automatically processes incoming orders, assigns priority using an AI agent base
 
 ```bash
 ai-automation-workflows/
+├── workflows/AI Cold Email Personalization Engine/
+├── workflows/AI Meeting Notes → Action Items Generator/
 ├── workflows/AI Instagram DM → Lead Capture & Qualification System (n8n)/
 ├── workflows/Multilingual AI Customer Support Automation/
 ├── workflows/job-matching-agent/

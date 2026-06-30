@@ -1,0 +1,1479 @@
+{
+  "updatedAt": "2026-06-29T08:32:55.510Z",
+  "createdAt": "2026-06-28T13:14:53.691Z",
+  "id": "l2rsvx4i1C8cD0Oe",
+  "name": "AI Cold Email Personalization Engine",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cold-email-personalizer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c05f5ac8-be9d-4b7c-8527-63284e394c14",
+      "name": "🌐 Receive Lead Data",
+      "webhookId": "<YOUR_WEBHOOK_ID_1>"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "37499d5e-edd4-437d-9d44-1d3c2bcb3dfe",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "7cd150ec-c046-4620-9382-6c3e00baea79",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "d9d44a0f-41b3-4925-bbe7-03211f5a4c18",
+              "name": "company",
+              "value": "={{ $json.body.company }}",
+              "type": "string"
+            },
+            {
+              "id": "c72f486e-e3a3-49d5-b148-a265a54f94ca",
+              "name": "website",
+              "value": "={{ $json.body.website }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "43f2130d-47aa-4ee3-8a13-4cd0ee821630",
+      "name": "📝 Normalize Lead Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c568cf54-b534-4c97-a73c-23aacce6f6e2",
+              "leftValue": "={{$json.website}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b81b7444-d421-4704-a9ff-caeac501225c",
+      "name": "🌍 Website Available?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/actors/apify~website-content-crawler/run-sync-get-dataset-items",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer <YOUR_APIFY_API_KEY>"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"startUrls\": [\n    {\n      \"url\": \"{{$json.website}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "44b82710-31b1-450b-9649-603a0a047d55",
+      "name": "🌐 Fetch Website Content"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -96
+      ],
+      "id": "37ba1333-a90e-48e0-8271-c408a1b19a4d",
+      "name": "📄 Combine Website Content"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data[0].text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an expert business research analyst.\n\nYour task is to analyze the provided company website content and extract business information.\n\nRead the complete website carefully.\n\nIdentify:\n\n- Company Name\n- Business Description\n- Industry\n- Services\n- Target Audience\n- Unique Selling Points\n- Possible Business Pain Points\n- Brand Tone\n- One genuine compliment\n- One personalization hook suitable for a cold email\n\nRules:\n\n- Use only the provided website content.\n- Do not hallucinate.\n- If information is unavailable, use null.\n- Keep responses concise.\n- Return the result using the structured output format provided by the system."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1072,
+        -96
+      ],
+      "id": "a625d215-ff7e-43a8-8158-44829a988684",
+      "name": "🔍 AI Business Research"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>",
+          "mode": "list",
+          "cachedResultName": "AI Cold emial Engine",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Lead Name": "={{ $('📝 Normalize Lead Data').item.json.name }}",
+            "Email": "={{ $('📝 Normalize Lead Data').item.json.email }}",
+            "Company": "={{ $('📝 Normalize Lead Data').item.json.company }}",
+            "Website": "={{ $('📝 Normalize Lead Data').item.json.website }}",
+            "Industry": "={{ $json.output.industry }}",
+            "Personalization hook": "={{ $json.output.personalization_hook }}",
+            "Business_summary": "={{ $json.output.business_summary }}",
+            "Services": "={{ $json.output.services }}",
+            "Target_Audience": "={{ $json.output.target_audience }}",
+            "Pain points": "={{ $json.output.pain_points }}",
+            "Unique_selling_points": "={{ $json.output.unique_selling_points }}",
+            "Brand_tone": "={{ $json.output.brand_tone }}",
+            "Compliment": "={{ $json.output.compliment }}"
+          },
+          "matchingColumns": [
+            "output"
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lead Name",
+              "displayName": "Lead Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Business_summary",
+              "displayName": "Business_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Services",
+              "displayName": "Services",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Target_Audience",
+              "displayName": "Target_Audience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Personalization hook",
+              "displayName": "Personalization hook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Unique_selling_points",
+              "displayName": "Unique_selling_points",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pain points",
+              "displayName": "Pain points",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Brand_tone",
+              "displayName": "Brand_tone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Compliment",
+              "displayName": "Compliment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1424,
+        -96
+      ],
+      "id": "767255ed-2033-4d03-94fd-93915ed2bdd7",
+      "name": "📊 Store Business Insights",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "<YOUR_GOOGLE_SHEETS_CREDENTIAL_ID>",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Lead Name:\n{{ $json[\"Lead Name\"] }}\n\nCompany:\n{{ $json.Company }}\n\nBusiness Summary:\n{{ $json.Business_summary }}\n\nIndustry:\n{{ $json.Industry }}\n\nServices:\n{{ JSON.stringify($json.Services) }}\n\nTarget Audience:\n{{ $json.Target_Audience }}\n\nUnique Selling Points:\n{{ JSON.stringify($json.Unique_selling_points) }}\n\nPossible Business Challenges:\n{{ JSON.stringify($json[\"Pain points\"]) }}\n\nBrand Tone:\n{{ $json.Brand_tone }}\n\nCompliment:\n{{ $json.Compliment }}\n\nPersonalization Hook:\n{{ $json[\"Personalization hook\"] }}\n\nGenerate a highly personalized cold email.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an expert B2B Sales Development Representative (SDR) specializing in highly personalized cold outreach.\n\nYour goal is to write a professional, human, and personalized cold email.\n\nYou are NOT allowed to sound robotic or overly salesy.\n\nWrite as if you genuinely researched the company.\n\nRequirements:\n\n- Address the recipient by name.\n- Mention one genuine compliment.\n- Reference one personalization hook.\n- Mention one possible business challenge naturally.\n- Introduce our AI Automation & n8n Workflow solutions.\n- Explain the value in 2–3 sentences.\n- End with a soft CTA.\n- Keep the email between 120–180 words.\n- Do not use emojis.\n- Do not exaggerate.\n- Do not use clickbait.\n- Do not use generic marketing phrases.\n\nOur Services:\n\n• AI Agents\n• n8n Workflow Automation\n• Business Process Automation\n• CRM Automation\n• Customer Support Automation\n• Lead Generation Automation\n• Internal Workflow Automation\n\nReturn the response using the structured output format."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1632,
+        -96
+      ],
+      "id": "9505dc88-0cd8-41e1-9e1c-4600c9dcfd17",
+      "name": "🤖 Generate Personalized Email"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1888,
+        -272
+      ],
+      "id": "4312c398-c0ac-4f45-91a3-3d6c3fd40aec",
+      "name": "🔀 Merge Lead & Email Data"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "={{ $json.output.subject }}",
+        "message": "={{ $json.output.email }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2032,
+        -96
+      ],
+      "id": "5f59572b-d42d-48b6-bfce-407e6e2f0ae2",
+      "name": "📧 Send Personalized Email",
+      "webhookId": "<YOUR_WEBHOOK_ID_2>",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "<YOUR_GMAIL_CREDENTIAL_ID>",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('📝 Normalize Lead Data').item.json.email }}",
+        "subject": "Quick idea for Node8 Innovations",
+        "message": "=Hi {{ $('📝 Normalize Lead Data').item.json.name }},  I came across {{ $('📝 Normalize Lead Data').item.json.company }} and wanted to reach out.  We help businesses automate repetitive work using AI Agents and n8n workflows.  I'd love to explore if there are opportunities to help your team save time and improve efficiency.  Would you be open to a quick 15-minute conversation?  Best regards, Chandu",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        112
+      ],
+      "id": "d05259cc-ed4f-4913-879c-504eef5c21a5",
+      "name": "📧 Send Generic Email",
+      "webhookId": "<YOUR_WEBHOOK_ID_3>",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "<YOUR_GMAIL_CREDENTIAL_ID>",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-oss-20b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1040,
+        96
+      ],
+      "id": "d3d8e161-d66b-4bb0-9b60-b6d237b13ccf",
+      "name": "🧠 Business Research Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "<YOUR_OPENAI_CREDENTIAL_ID>",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-oss-20b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1616,
+        96
+      ],
+      "id": "08cc02ce-e121-4c31-a1ca-512d7b73ff9e",
+      "name": "🧠 Email Generation Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "<YOUR_OPENAI_CREDENTIAL_ID>",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"company_name\": \"Node8 Innovations\",\n  \"business_summary\": \"Digital technology company specializing in software development, AI automation, branding and growth.\",\n  \"industry\": \"Software Development\",\n  \"services\": [\n    \"Web Development\",\n    \"Mobile App Development\",\n    \"AI Automation\"\n  ],\n  \"target_audience\": \"Businesses seeking digital transformation\",\n  \"unique_selling_points\": [\n    \"AI-powered solutions\",\n    \"End-to-end development\",\n    \"Fast delivery\"\n  ],\n  \"pain_points\": [\n    \"Manual processes\",\n    \"Disconnected systems\",\n    \"Slow workflows\"\n  ],\n  \"brand_tone\": \"Professional and innovative\",\n  \"compliment\": \"Strong focus on solving business problems through technology.\",\n  \"personalization_hook\": \"I noticed your emphasis on eliminating manual bottlenecks through smart technology.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1248,
+        112
+      ],
+      "id": "8c505e7e-9543-4c25-b069-10fa25e9f753",
+      "name": "📋 Business Research Parser"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"subject\": \"Quick idea for Node8 Innovations\",\n  \"preview_text\": \"A few workflow improvements that could save hours every week.\",\n  \"email\": \"Hi Chandu,\\n\\nI recently came across Node8 Innovations and was genuinely impressed by your focus on helping businesses eliminate operational bottlenecks through innovative technology.\\n\\nYour work with clients like Fluxweb really stood out to me.\\n\\nI believe there may be opportunities to automate some internal workflows even further using AI Agents and n8n automations.\\n\\nWe've helped businesses reduce repetitive work, streamline operations, and improve response times without disrupting existing systems.\\n\\nWould you be open to a quick 15-minute conversation next week to exchange ideas?\\n\\nLooking forward to hearing your thoughts.\\n\\nBest regards,\\nChandu\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1776,
+        96
+      ],
+      "id": "60a4da28-0871-4971-98e2-6398937f5e2f",
+      "name": "📋 Email Output Parser"
+    }
+  ],
+  "connections": {
+    "🌐 Receive Lead Data": {
+      "main": [
+        [
+          {
+            "node": "📝 Normalize Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Normalize Lead Data": {
+      "main": [
+        [
+          {
+            "node": "🌍 Website Available?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🌍 Website Available?": {
+      "main": [
+        [
+          {
+            "node": "🌐 Fetch Website Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📧 Send Generic Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🌐 Fetch Website Content": {
+      "main": [
+        [
+          {
+            "node": "📄 Combine Website Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Combine Website Content": {
+      "main": [
+        [
+          {
+            "node": "🔍 AI Business Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 AI Business Research": {
+      "main": [
+        [
+          {
+            "node": "📊 Store Business Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Store Business Insights": {
+      "main": [
+        [
+          {
+            "node": "🤖 Generate Personalized Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🔀 Merge Lead & Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 Generate Personalized Email": {
+      "main": [
+        [
+          {
+            "node": "🔀 Merge Lead & Email Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "🔀 Merge Lead & Email Data": {
+      "main": [
+        [
+          {
+            "node": "📧 Send Personalized Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📧 Send Personalized Email": {
+      "main": [
+        []
+      ]
+    },
+    "🧠 Business Research Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🔍 AI Business Research",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Email Generation Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🤖 Generate Personalized Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Business Research Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "🔍 AI Business Research",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Email Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "🤖 Generate Personalized Email",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedPerExecution": 50
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "dc78810e-3d14-4db1-b887-699c1a166ec7",
+  "activeVersionId": "dc78810e-3d14-4db1-b887-699c1a166ec7",
+  "versionCounter": 176,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-06-28T13:14:53.697Z",
+      "createdAt": "2026-06-28T13:14:53.697Z",
+      "role": "workflow:owner",
+      "workflowId": "l2rsvx4i1C8cD0Oe",
+      "projectId": "loWf0mBs1xKuh5N3",
+      "project": {
+        "updatedAt": "2026-06-04T07:55:05.260Z",
+        "createdAt": "2026-06-04T07:52:41.897Z",
+        "id": "loWf0mBs1xKuh5N3",
+        "name": "Chandu M <chandouqiande@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2026-06-09T06:33:15.749Z",
+      "createdAt": "2026-06-09T06:33:15.749Z",
+      "id": "OqenQjr9s45g7AEO",
+      "name": "ai"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:45.548Z",
+      "createdAt": "2026-06-09T06:33:45.548Z",
+      "id": "SSAFLny1wplVixFm",
+      "name": "ai agent"
+    },
+    {
+      "updatedAt": "2026-06-14T09:43:35.128Z",
+      "createdAt": "2026-06-14T09:43:35.128Z",
+      "id": "UUVDmqnlelP41qT2",
+      "name": "Email Automation"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:22.379Z",
+      "createdAt": "2026-06-09T06:33:22.379Z",
+      "id": "aM91rNGq256NAUAN",
+      "name": "automation"
+    },
+    {
+      "updatedAt": "2026-06-19T18:47:33.921Z",
+      "createdAt": "2026-06-19T18:47:33.921Z",
+      "id": "adTN6XPgfo01vqx0",
+      "name": "ai automation"
+    }
+  ],
+  "parentFolder": null,
+  "activeVersion": {
+    "updatedAt": "2026-06-29T08:32:00.000Z",
+    "createdAt": "2026-06-29T08:30:44.668Z",
+    "versionId": "dc78810e-3d14-4db1-b887-699c1a166ec7",
+    "workflowId": "l2rsvx4i1C8cD0Oe",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "cold-email-personalizer",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "c05f5ac8-be9d-4b7c-8527-63284e394c14",
+        "name": "🌐 Receive Lead Data",
+        "webhookId": "<YOUR_WEBHOOK_ID_1>"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "37499d5e-edd4-437d-9d44-1d3c2bcb3dfe",
+                "name": "name",
+                "value": "={{ $json.body.name }}",
+                "type": "string"
+              },
+              {
+                "id": "7cd150ec-c046-4620-9382-6c3e00baea79",
+                "name": "email",
+                "value": "={{ $json.body.email }}",
+                "type": "string"
+              },
+              {
+                "id": "d9d44a0f-41b3-4925-bbe7-03211f5a4c18",
+                "name": "company",
+                "value": "={{ $json.body.company }}",
+                "type": "string"
+              },
+              {
+                "id": "c72f486e-e3a3-49d5-b148-a265a54f94ca",
+                "name": "website",
+                "value": "={{ $json.body.website }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          208,
+          0
+        ],
+        "id": "43f2130d-47aa-4ee3-8a13-4cd0ee821630",
+        "name": "📝 Normalize Lead Data"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "c568cf54-b534-4c97-a73c-23aacce6f6e2",
+                "leftValue": "={{$json.website}}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          416,
+          0
+        ],
+        "id": "b81b7444-d421-4704-a9ff-caeac501225c",
+        "name": "🌍 Website Available?"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.apify.com/v2/actors/apify~website-content-crawler/run-sync-get-dataset-items",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer <YOUR_APIFY_API_KEY>"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"startUrls\": [\n    {\n      \"url\": \"{{$json.website}}\"\n    }\n  ]\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          624,
+          -96
+        ],
+        "id": "44b82710-31b1-450b-9649-603a0a047d55",
+        "name": "🌐 Fetch Website Content"
+      },
+      {
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1,
+        "position": [
+          832,
+          -96
+        ],
+        "id": "37ba1333-a90e-48e0-8271-c408a1b19a4d",
+        "name": "📄 Combine Website Content"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $json.data[0].text }}",
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "You are an expert business research analyst.\n\nYour task is to analyze the provided company website content and extract business information.\n\nRead the complete website carefully.\n\nIdentify:\n\n- Company Name\n- Business Description\n- Industry\n- Services\n- Target Audience\n- Unique Selling Points\n- Possible Business Pain Points\n- Brand Tone\n- One genuine compliment\n- One personalization hook suitable for a cold email\n\nRules:\n\n- Use only the provided website content.\n- Do not hallucinate.\n- If information is unavailable, use null.\n- Keep responses concise.\n- Return the result using the structured output format provided by the system."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1072,
+          -96
+        ],
+        "id": "a625d215-ff7e-43a8-8158-44829a988684",
+        "name": "🔍 AI Business Research"
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>",
+            "mode": "list",
+            "cachedResultName": "AI Cold emial Engine",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>/edit#gid=0"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Timestamp": "={{ $now }}",
+              "Lead Name": "={{ $('📝 Normalize Lead Data').item.json.name }}",
+              "Email": "={{ $('📝 Normalize Lead Data').item.json.email }}",
+              "Company": "={{ $('📝 Normalize Lead Data').item.json.company }}",
+              "Website": "={{ $('📝 Normalize Lead Data').item.json.website }}",
+              "Industry": "={{ $json.output.industry }}",
+              "Personalization hook": "={{ $json.output.personalization_hook }}",
+              "Business_summary": "={{ $json.output.business_summary }}",
+              "Services": "={{ $json.output.services }}",
+              "Target_Audience": "={{ $json.output.target_audience }}",
+              "Pain points": "={{ $json.output.pain_points }}",
+              "Unique_selling_points": "={{ $json.output.unique_selling_points }}",
+              "Brand_tone": "={{ $json.output.brand_tone }}",
+              "Compliment": "={{ $json.output.compliment }}"
+            },
+            "matchingColumns": [
+              "output"
+            ],
+            "schema": [
+              {
+                "id": "Timestamp",
+                "displayName": "Timestamp",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Lead Name",
+                "displayName": "Lead Name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Email",
+                "displayName": "Email",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Company",
+                "displayName": "Company",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Website",
+                "displayName": "Website",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Industry",
+                "displayName": "Industry",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Business_summary",
+                "displayName": "Business_summary",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Services",
+                "displayName": "Services",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Target_Audience",
+                "displayName": "Target_Audience",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Personalization hook",
+                "displayName": "Personalization hook",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Unique_selling_points",
+                "displayName": "Unique_selling_points",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Pain points",
+                "displayName": "Pain points",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Brand_tone",
+                "displayName": "Brand_tone",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Compliment",
+                "displayName": "Compliment",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          1424,
+          -96
+        ],
+        "id": "767255ed-2033-4d03-94fd-93915ed2bdd7",
+        "name": "📊 Store Business Insights",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "<YOUR_GOOGLE_SHEETS_CREDENTIAL_ID>",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Lead Name:\n{{ $json[\"Lead Name\"] }}\n\nCompany:\n{{ $json.Company }}\n\nBusiness Summary:\n{{ $json.Business_summary }}\n\nIndustry:\n{{ $json.Industry }}\n\nServices:\n{{ JSON.stringify($json.Services) }}\n\nTarget Audience:\n{{ $json.Target_Audience }}\n\nUnique Selling Points:\n{{ JSON.stringify($json.Unique_selling_points) }}\n\nPossible Business Challenges:\n{{ JSON.stringify($json[\"Pain points\"]) }}\n\nBrand Tone:\n{{ $json.Brand_tone }}\n\nCompliment:\n{{ $json.Compliment }}\n\nPersonalization Hook:\n{{ $json[\"Personalization hook\"] }}\n\nGenerate a highly personalized cold email.",
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "You are an expert B2B Sales Development Representative (SDR) specializing in highly personalized cold outreach.\n\nYour goal is to write a professional, human, and personalized cold email.\n\nYou are NOT allowed to sound robotic or overly salesy.\n\nWrite as if you genuinely researched the company.\n\nRequirements:\n\n- Address the recipient by name.\n- Mention one genuine compliment.\n- Reference one personalization hook.\n- Mention one possible business challenge naturally.\n- Introduce our AI Automation & n8n Workflow solutions.\n- Explain the value in 2–3 sentences.\n- End with a soft CTA.\n- Keep the email between 120–180 words.\n- Do not use emojis.\n- Do not exaggerate.\n- Do not use clickbait.\n- Do not use generic marketing phrases.\n\nOur Services:\n\n• AI Agents\n• n8n Workflow Automation\n• Business Process Automation\n• CRM Automation\n• Customer Support Automation\n• Lead Generation Automation\n• Internal Workflow Automation\n\nReturn the response using the structured output format."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1632,
+          -96
+        ],
+        "id": "9505dc88-0cd8-41e1-9e1c-4600c9dcfd17",
+        "name": "🤖 Generate Personalized Email"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1888,
+          -272
+        ],
+        "id": "4312c398-c0ac-4f45-91a3-3d6c3fd40aec",
+        "name": "🔀 Merge Lead & Email Data"
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $json.Email }}",
+          "subject": "={{ $json.output.subject }}",
+          "message": "={{ $json.output.email }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          2032,
+          -96
+        ],
+        "id": "5f59572b-d42d-48b6-bfce-407e6e2f0ae2",
+        "name": "📧 Send Personalized Email",
+        "webhookId": "<YOUR_WEBHOOK_ID_2>",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "<YOUR_GMAIL_CREDENTIAL_ID>",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $('📝 Normalize Lead Data').item.json.email }}",
+          "subject": "Quick idea for Node8 Innovations",
+          "message": "=Hi {{ $('📝 Normalize Lead Data').item.json.name }},  I came across {{ $('📝 Normalize Lead Data').item.json.company }} and wanted to reach out.  We help businesses automate repetitive work using AI Agents and n8n workflows.  I'd love to explore if there are opportunities to help your team save time and improve efficiency.  Would you be open to a quick 15-minute conversation?  Best regards, Chandu",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          672,
+          112
+        ],
+        "id": "d05259cc-ed4f-4913-879c-504eef5c21a5",
+        "name": "📧 Send Generic Email",
+        "webhookId": "<YOUR_WEBHOOK_ID_3>",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "<YOUR_GMAIL_CREDENTIAL_ID>",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openai/gpt-oss-20b",
+            "mode": "list",
+            "cachedResultName": "openai/gpt-oss-20b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1040,
+          96
+        ],
+        "id": "d3d8e161-d66b-4bb0-9b60-b6d237b13ccf",
+        "name": "🧠 Business Research Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "<YOUR_OPENAI_CREDENTIAL_ID>",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openai/gpt-oss-20b",
+            "mode": "list",
+            "cachedResultName": "openai/gpt-oss-20b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1616,
+          96
+        ],
+        "id": "08cc02ce-e121-4c31-a1ca-512d7b73ff9e",
+        "name": "🧠 Email Generation Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "<YOUR_OPENAI_CREDENTIAL_ID>",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsonSchemaExample": "{\n  \"company_name\": \"Node8 Innovations\",\n  \"business_summary\": \"Digital technology company specializing in software development, AI automation, branding and growth.\",\n  \"industry\": \"Software Development\",\n  \"services\": [\n    \"Web Development\",\n    \"Mobile App Development\",\n    \"AI Automation\"\n  ],\n  \"target_audience\": \"Businesses seeking digital transformation\",\n  \"unique_selling_points\": [\n    \"AI-powered solutions\",\n    \"End-to-end development\",\n    \"Fast delivery\"\n  ],\n  \"pain_points\": [\n    \"Manual processes\",\n    \"Disconnected systems\",\n    \"Slow workflows\"\n  ],\n  \"brand_tone\": \"Professional and innovative\",\n  \"compliment\": \"Strong focus on solving business problems through technology.\",\n  \"personalization_hook\": \"I noticed your emphasis on eliminating manual bottlenecks through smart technology.\"\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          1248,
+          112
+        ],
+        "id": "8c505e7e-9543-4c25-b069-10fa25e9f753",
+        "name": "📋 Business Research Parser"
+      },
+      {
+        "parameters": {
+          "jsonSchemaExample": "{\n  \"subject\": \"Quick idea for Node8 Innovations\",\n  \"preview_text\": \"A few workflow improvements that could save hours every week.\",\n  \"email\": \"Hi Chandu,\\n\\nI recently came across Node8 Innovations and was genuinely impressed by your focus on helping businesses eliminate operational bottlenecks through innovative technology.\\n\\nYour work with clients like Fluxweb really stood out to me.\\n\\nI believe there may be opportunities to automate some internal workflows even further using AI Agents and n8n automations.\\n\\nWe've helped businesses reduce repetitive work, streamline operations, and improve response times without disrupting existing systems.\\n\\nWould you be open to a quick 15-minute conversation next week to exchange ideas?\\n\\nLooking forward to hearing your thoughts.\\n\\nBest regards,\\nChandu\"\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          1776,
+          96
+        ],
+        "id": "60a4da28-0871-4971-98e2-6398937f5e2f",
+        "name": "📋 Email Output Parser"
+      }
+    ],
+    "connections": {
+      "🌐 Receive Lead Data": {
+        "main": [
+          [
+            {
+              "node": "📝 Normalize Lead Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📝 Normalize Lead Data": {
+        "main": [
+          [
+            {
+              "node": "🌍 Website Available?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🌍 Website Available?": {
+        "main": [
+          [
+            {
+              "node": "🌐 Fetch Website Content",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "📧 Send Generic Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🌐 Fetch Website Content": {
+        "main": [
+          [
+            {
+              "node": "📄 Combine Website Content",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📄 Combine Website Content": {
+        "main": [
+          [
+            {
+              "node": "🔍 AI Business Research",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔍 AI Business Research": {
+        "main": [
+          [
+            {
+              "node": "📊 Store Business Insights",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📊 Store Business Insights": {
+        "main": [
+          [
+            {
+              "node": "🤖 Generate Personalized Email",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "🔀 Merge Lead & Email Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🤖 Generate Personalized Email": {
+        "main": [
+          [
+            {
+              "node": "🔀 Merge Lead & Email Data",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "🔀 Merge Lead & Email Data": {
+        "main": [
+          [
+            {
+              "node": "📧 Send Personalized Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📧 Send Personalized Email": {
+        "main": [
+          []
+        ]
+      },
+      "🧠 Business Research Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "🔍 AI Business Research",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🧠 Email Generation Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "🤖 Generate Personalized Email",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📋 Business Research Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "🔍 AI Business Research",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📋 Email Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "🤖 Generate Personalized Email",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Chandu M",
+    "name": "AI-Powered Cold Email Outreach Agent",
+    "description": "",
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-29T08:32:00.523Z",
+        "id": 42,
+        "workflowId": "l2rsvx4i1C8cD0Oe",
+        "versionId": "dc78810e-3d14-4db1-b887-699c1a166ec7",
+        "event": "activated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      },
+      {
+        "createdAt": "2026-06-29T08:32:37.374Z",
+        "id": 44,
+        "workflowId": "l2rsvx4i1C8cD0Oe",
+        "versionId": "dc78810e-3d14-4db1-b887-699c1a166ec7",
+        "event": "activated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      },
+      {
+        "createdAt": "2026-06-29T08:32:37.330Z",
+        "id": 43,
+        "workflowId": "l2rsvx4i1C8cD0Oe",
+        "versionId": "dc78810e-3d14-4db1-b887-699c1a166ec7",
+        "event": "deactivated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    ]
+  },
+  "scopes": [
+    "execution:reveal",
+    "workflow:create",
+    "workflow:delete",
+    "workflow:disableRedaction",
+    "workflow:enableRedaction",
+    "workflow:execute",
+    "workflow:execute-chat",
+    "workflow:export",
+    "workflow:list",
+    "workflow:move",
+    "workflow:publish",
+    "workflow:read",
+    "workflow:share",
+    "workflow:unpublish",
+    "workflow:unshare",
+    "workflow:update"
+  ],
+  "checksum": "5f162ac24ef7ea79768a5fd047c2d1251d82e129a4287ce20b3f75ba789448db"
+}

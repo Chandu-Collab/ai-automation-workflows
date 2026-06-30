@@ -1,0 +1,1117 @@
+{
+  "updatedAt": "2026-06-25T12:52:11.987Z",
+  "createdAt": "2026-06-25T08:20:38.200Z",
+  "id": "iYfB3QtZbw8JOFol",
+  "name": "AI Meeting Notes → Action Items Generator",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-oss-20b"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        208
+      ],
+      "id": "0a6821da-b948-462f-b4dc-be6034ae9ced",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "<YOUR_OPENAI_CREDENTIAL_ID>",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": {\n      \"type\": \"string\"\n    },\n    \"decisions\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"tasks\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"task\": {\n            \"type\": \"string\"\n          },\n          \"owner\": {\n            \"type\": [\n              \"string\",\n              \"null\"\n            ]\n          },\n          \"deadline\": {\n            \"type\": [\n              \"string\",\n              \"null\"\n            ]\n          },\n          \"priority\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"task\",\n          \"owner\",\n          \"deadline\",\n          \"priority\"\n        ]\n      }\n    }\n  },\n  \"required\": [\n    \"summary\",\n    \"decisions\",\n    \"tasks\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        208
+      ],
+      "id": "b82c63e1-643d-4202-8ef3-d3371f79d87b",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meeting-notes-generator",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0eb2e7fc-e3c3-4340-9d88-a7a82a7b125d",
+      "name": "Receive Meeting Transcript",
+      "webhookId": "<YOUR_WEBHOOK_ID_1>"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a791faa3-26a8-4e80-a6d3-aa87d8931523",
+              "name": "meetingTitle",
+              "value": "={{ $json.body.meetingTitle }}",
+              "type": "string"
+            },
+            {
+              "id": "9b09c06f-e747-449f-bd1f-5d6860d351f8",
+              "name": "meetingDate",
+              "value": "={{ $json.body.meetingDate }}",
+              "type": "string"
+            },
+            {
+              "id": "51c99577-97d8-4651-8216-55ad75570a2e",
+              "name": "participants",
+              "value": "={{ $json.body.participants }}",
+              "type": "array"
+            },
+            {
+              "id": "92f63a56-21b5-4be5-ad86-8e49b66be166",
+              "name": "transcript",
+              "value": "={{ $json.body.transcript }}",
+              "type": "string"
+            },
+            {
+              "id": "2ee831e7-85eb-4c3e-b5f2-5672dd14019d",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c4e9aca2-cf0e-4987-8bdd-6b3e25281e0e",
+      "name": "Prepare Meeting Data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Meeting Title:\n{{ $json.meetingTitle }}\n\nMeeting Date:\n{{ $json.meetingDate }}\n\nParticipants:\n{{ $json.participants.join(', ') }}\n\nTranscript:\n{{ $json.transcript }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an AI Meeting Assistant.\n\nAnalyze the meeting transcript and extract:\n\n1. Meeting Summary\n2. Key Decisions\n3. Action Items\n\nFor each action item include:\n- Task\n- Owner\n- Deadline\n- Priority (High, Medium, Low)\n\nRules:\n- If owner is not mentioned, return null.\n- If deadline is not mentioned, return null.\n- Return ONLY valid JSON.\nReturn ONLY valid JSON.\n\nDo NOT wrap the response in markdown.\n\nDo NOT use ```json.\n\nDo NOT include explanations.\n\nUse exactly this schema:\n\n{\n  \"summary\": \"...\",\n  \"decisions\": [],\n  \"tasks\": [\n    {\n      \"task\": \"\",\n      \"owner\": \"\",\n      \"deadline\": \"\",\n      \"priority\": \"\"\n    }\n  ]\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "39d3c8ed-d388-46f0-8639-39ba24265e10",
+      "name": "Extract Meeting Insights"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.tasks",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        720,
+        16
+      ],
+      "id": "f6e16535-2b36-4f7e-8586-9b11e1e8a68f",
+      "name": "Split Action Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "46bd2c39-d240-4b69-bf0b-7ff80f098db9",
+              "name": "summary",
+              "value": "={{ $json.output.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "d21b2f7d-8736-4546-82f2-cdda55fe03b7",
+              "name": "decisions",
+              "value": "={{ $json.output.decisions }}",
+              "type": "array"
+            },
+            {
+              "id": "e91a412e-22eb-4519-8f40-b27685fe7001",
+              "name": "task",
+              "value": "={{ $json[\"output.tasks\"].task }}",
+              "type": "string"
+            },
+            {
+              "id": "a259f556-15b5-4e92-9d71-58a985184400",
+              "name": "owner",
+              "value": "={{ $json[\"output.tasks\"].owner }}",
+              "type": "string"
+            },
+            {
+              "id": "570deeaa-d7ce-49b1-bd7d-962f6b8785a8",
+              "name": "deadline",
+              "value": "={{ $json[\"output.tasks\"].deadline }}",
+              "type": "string"
+            },
+            {
+              "id": "2d50d035-6a35-4e2e-bb53-efbe15a7f6cc",
+              "name": "priority",
+              "value": "={{ $json[\"output.tasks\"].priority }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        32
+      ],
+      "id": "aca824db-4476-4011-8a92-41a62cb6f542",
+      "name": "Format Task Records"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>",
+          "mode": "list",
+          "cachedResultName": "Ai Meeting notes Generator",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Meeting Summary": "={{ $json.summary }}",
+            "Decision": "={{ $json.decisions }}",
+            "Task": "={{ $json.task }}",
+            "Owner": "={{ $json.owner }}",
+            "Priority": "={{ $json.priority }}",
+            "Deadline": "={{ $json.deadline }}"
+          },
+          "matchingColumns": [
+            "output"
+          ],
+          "schema": [
+            {
+              "id": "Meeting Summary",
+              "displayName": "Meeting Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Decision",
+              "displayName": "Decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Task",
+              "displayName": "Task",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Owner",
+              "displayName": "Owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Deadline",
+              "displayName": "Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1104,
+        32
+      ],
+      "id": "752fd850-c7f1-4ecf-b269-684b8fb7e99e",
+      "name": "Save Tasks to Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "<YOUR_GOOGLE_SHEETS_CREDENTIAL_ID>",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        32
+      ],
+      "id": "6dcadbe7-5cd2-4d49-bdbd-0f7eab0d7ff3",
+      "name": "Combine Meeting Results"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $json.data;\n\nconst summary = items[0][\"Meeting Summary\"];\nconst decision = items[0][\"Decision\"].join(\"\\n• \");\n\nlet emailBody = `📋 Meeting Summary\n\n${summary}\n\n----------------------------------------\n\n📌 Key Decision(s)\n\n• ${decision}\n\n----------------------------------------\n\n✅ Action Items\n\n`;\n\nitems.forEach((item, index) => {\n  emailBody += `${index + 1}. ${item.Owner}\n\nTask: ${item.Task}\nDeadline: ${item.Deadline ?? item.Dealine}\nPriority: ${item.Priority}\n\n`;\n});\n\nreturn [\n  {\n    json: {\n      subject: \"Meeting Summary & Action Items\",\n      emailBody\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        32
+      ],
+      "id": "7ef57952-8a16-4bec-b4b5-154e58cef266",
+      "name": "Generate Email Summary"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1600,
+        -176
+      ],
+      "id": "249b1a60-cc71-46f6-8d3a-267f3b94a906",
+      "name": "Merge Workflow Results"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1728,
+        32
+      ],
+      "id": "f5cbe039-8a7a-441b-a399-ba8c4b8df985",
+      "name": "Send Meeting Summary Email",
+      "webhookId": "<YOUR_WEBHOOK_ID_2>",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "<YOUR_GMAIL_CREDENTIAL_ID>",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Meeting Insights",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Extract Meeting Insights",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Meeting Transcript": {
+      "main": [
+        [
+          {
+            "node": "Prepare Meeting Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Meeting Data": {
+      "main": [
+        [
+          {
+            "node": "Extract Meeting Insights",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Workflow Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Meeting Insights": {
+      "main": [
+        [
+          {
+            "node": "Split Action Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Action Items": {
+      "main": [
+        [
+          {
+            "node": "Format Task Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Task Records": {
+      "main": [
+        [
+          {
+            "node": "Save Tasks to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Tasks to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Combine Meeting Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Meeting Results": {
+      "main": [
+        [
+          {
+            "node": "Generate Email Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Email Summary": {
+      "main": [
+        [
+          {
+            "node": "Merge Workflow Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Workflow Results": {
+      "main": [
+        [
+          {
+            "node": "Send Meeting Summary Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Meeting Summary Email": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedPerExecution": 20
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "c4e465c6-0b10-486a-83b9-b887f49dbd92",
+  "activeVersionId": "c4e465c6-0b10-486a-83b9-b887f49dbd92",
+  "versionCounter": 123,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-06-25T08:20:38.208Z",
+      "createdAt": "2026-06-25T08:20:38.208Z",
+      "role": "workflow:owner",
+      "workflowId": "iYfB3QtZbw8JOFol",
+      "projectId": "loWf0mBs1xKuh5N3",
+      "project": {
+        "updatedAt": "2026-06-04T07:55:05.260Z",
+        "createdAt": "2026-06-04T07:52:41.897Z",
+        "id": "loWf0mBs1xKuh5N3",
+        "name": "Chandu M <chandouqiande@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2026-06-09T06:33:27.317Z",
+      "createdAt": "2026-06-09T06:33:27.317Z",
+      "id": "8ZUaEfWmhomQ0P8p",
+      "name": "n8n"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:15.749Z",
+      "createdAt": "2026-06-09T06:33:15.749Z",
+      "id": "OqenQjr9s45g7AEO",
+      "name": "ai"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:45.548Z",
+      "createdAt": "2026-06-09T06:33:45.548Z",
+      "id": "SSAFLny1wplVixFm",
+      "name": "ai agent"
+    },
+    {
+      "updatedAt": "2026-06-09T06:33:22.379Z",
+      "createdAt": "2026-06-09T06:33:22.379Z",
+      "id": "aM91rNGq256NAUAN",
+      "name": "automation"
+    }
+  ],
+  "parentFolder": null,
+  "activeVersion": {
+    "updatedAt": "2026-06-25T12:52:59.000Z",
+    "createdAt": "2026-06-25T12:52:11.990Z",
+    "versionId": "c4e465c6-0b10-486a-83b9-b887f49dbd92",
+    "workflowId": "iYfB3QtZbw8JOFol",
+    "nodes": [
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "openai/gpt-oss-20b",
+            "mode": "list",
+            "cachedResultName": "openai/gpt-oss-20b"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          288,
+          208
+        ],
+        "id": "0a6821da-b948-462f-b4dc-be6034ae9ced",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "<YOUR_OPENAI_CREDENTIAL_ID>",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "schemaType": "manual",
+          "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": {\n      \"type\": \"string\"\n    },\n    \"decisions\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"tasks\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"task\": {\n            \"type\": \"string\"\n          },\n          \"owner\": {\n            \"type\": [\n              \"string\",\n              \"null\"\n            ]\n          },\n          \"deadline\": {\n            \"type\": [\n              \"string\",\n              \"null\"\n            ]\n          },\n          \"priority\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"task\",\n          \"owner\",\n          \"deadline\",\n          \"priority\"\n        ]\n      }\n    }\n  },\n  \"required\": [\n    \"summary\",\n    \"decisions\",\n    \"tasks\"\n  ]\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          592,
+          208
+        ],
+        "id": "b82c63e1-643d-4202-8ef3-d3371f79d87b",
+        "name": "Structured Output Parser"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "meeting-notes-generator",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "0eb2e7fc-e3c3-4340-9d88-a7a82a7b125d",
+        "name": "Receive Meeting Transcript",
+        "webhookId": "<YOUR_WEBHOOK_ID_1>"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a791faa3-26a8-4e80-a6d3-aa87d8931523",
+                "name": "meetingTitle",
+                "value": "={{ $json.body.meetingTitle }}",
+                "type": "string"
+              },
+              {
+                "id": "9b09c06f-e747-449f-bd1f-5d6860d351f8",
+                "name": "meetingDate",
+                "value": "={{ $json.body.meetingDate }}",
+                "type": "string"
+              },
+              {
+                "id": "51c99577-97d8-4651-8216-55ad75570a2e",
+                "name": "participants",
+                "value": "={{ $json.body.participants }}",
+                "type": "array"
+              },
+              {
+                "id": "92f63a56-21b5-4be5-ad86-8e49b66be166",
+                "name": "transcript",
+                "value": "={{ $json.body.transcript }}",
+                "type": "string"
+              },
+              {
+                "id": "2ee831e7-85eb-4c3e-b5f2-5672dd14019d",
+                "name": "email",
+                "value": "={{ $json.body.email }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          208,
+          0
+        ],
+        "id": "c4e9aca2-cf0e-4987-8bdd-6b3e25281e0e",
+        "name": "Prepare Meeting Data"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Meeting Title:\n{{ $json.meetingTitle }}\n\nMeeting Date:\n{{ $json.meetingDate }}\n\nParticipants:\n{{ $json.participants.join(', ') }}\n\nTranscript:\n{{ $json.transcript }}",
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "You are an AI Meeting Assistant.\n\nAnalyze the meeting transcript and extract:\n\n1. Meeting Summary\n2. Key Decisions\n3. Action Items\n\nFor each action item include:\n- Task\n- Owner\n- Deadline\n- Priority (High, Medium, Low)\n\nRules:\n- If owner is not mentioned, return null.\n- If deadline is not mentioned, return null.\n- Return ONLY valid JSON.\nReturn ONLY valid JSON.\n\nDo NOT wrap the response in markdown.\n\nDo NOT use ```json.\n\nDo NOT include explanations.\n\nUse exactly this schema:\n\n{\n  \"summary\": \"...\",\n  \"decisions\": [],\n  \"tasks\": [\n    {\n      \"task\": \"\",\n      \"owner\": \"\",\n      \"deadline\": \"\",\n      \"priority\": \"\"\n    }\n  ]\n}"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          416,
+          0
+        ],
+        "id": "39d3c8ed-d388-46f0-8639-39ba24265e10",
+        "name": "Extract Meeting Insights"
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "output.tasks",
+          "include": "allOtherFields",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          720,
+          16
+        ],
+        "id": "f6e16535-2b36-4f7e-8586-9b11e1e8a68f",
+        "name": "Split Action Items"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "46bd2c39-d240-4b69-bf0b-7ff80f098db9",
+                "name": "summary",
+                "value": "={{ $json.output.summary }}",
+                "type": "string"
+              },
+              {
+                "id": "d21b2f7d-8736-4546-82f2-cdda55fe03b7",
+                "name": "decisions",
+                "value": "={{ $json.output.decisions }}",
+                "type": "array"
+              },
+              {
+                "id": "e91a412e-22eb-4519-8f40-b27685fe7001",
+                "name": "task",
+                "value": "={{ $json[\"output.tasks\"].task }}",
+                "type": "string"
+              },
+              {
+                "id": "a259f556-15b5-4e92-9d71-58a985184400",
+                "name": "owner",
+                "value": "={{ $json[\"output.tasks\"].owner }}",
+                "type": "string"
+              },
+              {
+                "id": "570deeaa-d7ce-49b1-bd7d-962f6b8785a8",
+                "name": "deadline",
+                "value": "={{ $json[\"output.tasks\"].deadline }}",
+                "type": "string"
+              },
+              {
+                "id": "2d50d035-6a35-4e2e-bb53-efbe15a7f6cc",
+                "name": "priority",
+                "value": "={{ $json[\"output.tasks\"].priority }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          912,
+          32
+        ],
+        "id": "aca824db-4476-4011-8a92-41a62cb6f542",
+        "name": "Format Task Records"
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>",
+            "mode": "list",
+            "cachedResultName": "Ai Meeting notes Generator",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_GOOGLE_SHEETS_DOCUMENT_ID>/edit#gid=0"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Meeting Summary": "={{ $json.summary }}",
+              "Decision": "={{ $json.decisions }}",
+              "Task": "={{ $json.task }}",
+              "Owner": "={{ $json.owner }}",
+              "Priority": "={{ $json.priority }}",
+              "Deadline": "={{ $json.deadline }}"
+            },
+            "matchingColumns": [
+              "output"
+            ],
+            "schema": [
+              {
+                "id": "Meeting Summary",
+                "displayName": "Meeting Summary",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Decision",
+                "displayName": "Decision",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Task",
+                "displayName": "Task",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Owner",
+                "displayName": "Owner",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Deadline",
+                "displayName": "Deadline",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Priority",
+                "displayName": "Priority",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          1104,
+          32
+        ],
+        "id": "752fd850-c7f1-4ecf-b269-684b8fb7e99e",
+        "name": "Save Tasks to Google Sheets",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "<YOUR_GOOGLE_SHEETS_CREDENTIAL_ID>",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1,
+        "position": [
+          1312,
+          32
+        ],
+        "id": "6dcadbe7-5cd2-4d49-bdbd-0f7eab0d7ff3",
+        "name": "Combine Meeting Results"
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $json.data;\n\nconst summary = items[0][\"Meeting Summary\"];\nconst decision = items[0][\"Decision\"].join(\"\\n• \");\n\nlet emailBody = `📋 Meeting Summary\n\n${summary}\n\n----------------------------------------\n\n📌 Key Decision(s)\n\n• ${decision}\n\n----------------------------------------\n\n✅ Action Items\n\n`;\n\nitems.forEach((item, index) => {\n  emailBody += `${index + 1}. ${item.Owner}\n\nTask: ${item.Task}\nDeadline: ${item.Deadline ?? item.Dealine}\nPriority: ${item.Priority}\n\n`;\n});\n\nreturn [\n  {\n    json: {\n      subject: \"Meeting Summary & Action Items\",\n      emailBody\n    }\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1520,
+          32
+        ],
+        "id": "7ef57952-8a16-4bec-b4b5-154e58cef266",
+        "name": "Generate Email Summary"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1600,
+          -176
+        ],
+        "id": "249b1a60-cc71-46f6-8d3a-267f3b94a906",
+        "name": "Merge Workflow Results"
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $json.email }}",
+          "subject": "={{ $json.subject }}",
+          "emailType": "text",
+          "message": "={{ $json.emailBody }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          1728,
+          32
+        ],
+        "id": "f5cbe039-8a7a-441b-a399-ba8c4b8df985",
+        "name": "Send Meeting Summary Email",
+        "webhookId": "<YOUR_WEBHOOK_ID_2>",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "<YOUR_GMAIL_CREDENTIAL_ID>",
+            "name": "Gmail account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Extract Meeting Insights",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "Extract Meeting Insights",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Receive Meeting Transcript": {
+        "main": [
+          [
+            {
+              "node": "Prepare Meeting Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Meeting Data": {
+        "main": [
+          [
+            {
+              "node": "Extract Meeting Insights",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Merge Workflow Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Meeting Insights": {
+        "main": [
+          [
+            {
+              "node": "Split Action Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Action Items": {
+        "main": [
+          [
+            {
+              "node": "Format Task Records",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Task Records": {
+        "main": [
+          [
+            {
+              "node": "Save Tasks to Google Sheets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save Tasks to Google Sheets": {
+        "main": [
+          [
+            {
+              "node": "Combine Meeting Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Combine Meeting Results": {
+        "main": [
+          [
+            {
+              "node": "Generate Email Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Email Summary": {
+        "main": [
+          [
+            {
+              "node": "Merge Workflow Results",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge Workflow Results": {
+        "main": [
+          [
+            {
+              "node": "Send Meeting Summary Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Meeting Summary Email": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Chandu M",
+    "name": "AI Meeting Notes → Action Items Generator",
+    "description": "Naming each node according to their work",
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-25T12:52:59.883Z",
+        "id": 41,
+        "workflowId": "iYfB3QtZbw8JOFol",
+        "versionId": "c4e465c6-0b10-486a-83b9-b887f49dbd92",
+        "event": "activated",
+        "userId": "8d994dc9-eaab-443f-93bf-ef4aa823f36d"
+      }
+    ]
+  },
+  "scopes": [
+    "execution:reveal",
+    "workflow:create",
+    "workflow:delete",
+    "workflow:disableRedaction",
+    "workflow:enableRedaction",
+    "workflow:execute",
+    "workflow:execute-chat",
+    "workflow:export",
+    "workflow:list",
+    "workflow:move",
+    "workflow:publish",
+    "workflow:read",
+    "workflow:share",
+    "workflow:unpublish",
+    "workflow:unshare",
+    "workflow:update"
+  ],
+  "checksum": "ce1e2160a81af52e6aebf0fb55ae95af22dc61f6f8d66fc5ce3aa0b851b8a3c8"
+}
